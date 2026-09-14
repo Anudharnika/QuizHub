@@ -60,6 +60,7 @@ const io = new Server(server, {
 
 // Middleware
 app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 
 // Connect to DB (non-blocking)
