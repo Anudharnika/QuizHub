@@ -55,7 +55,18 @@ export default function LiveQuizPage() {
     }).catch(() => {});
 
     // Init socket
-    const socket = io('/', { transports: ['websocket', 'polling'] });
+    const getSocketUrl = () => {
+      const envUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
+      if (!envUrl) return '/';
+      try {
+        const parsed = new URL(envUrl, window.location.origin);
+        return parsed.origin;
+      } catch (e) {
+        return '/';
+      }
+    };
+
+    const socket = io(getSocketUrl(), { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
 
     socket.on('session_created', ({ code, quiz }) => {

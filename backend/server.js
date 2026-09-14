@@ -17,18 +17,49 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const mockStore = require('./utils/mockStore');
 
+// Configure allowed origins for CORS (Vercel production, local dev, custom CLIENT_URL)
+const allowedOrigins = [
+  'https://quiz-hub-rho-red.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+];
+
+if (process.env.CLIENT_URL) {
+  process.env.CLIENT_URL.split(',').forEach((url) => {
+    const trimmed = url.trim();
+    if (trimmed && !allowedOrigins.includes(trimmed)) {
+      allowedOrigins.push(trimmed);
+    }
+  });
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
   }
 });
 
 // Middleware
-app.use(cors({ origin: '*' }));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 
 // Connect to DB (non-blocking)
