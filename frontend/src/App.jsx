@@ -19,6 +19,8 @@ import LiveQuizPage from './pages/LiveQuizPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ThankYouPage from './pages/ThankYouPage';
 
 // Protected Route Guard
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -26,8 +28,8 @@ function ProtectedRoute({ children, adminOnly = false }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFDF9]">
+        <div className="w-12 h-12 border-4 border-[#EC4899] border-t-black rounded-full animate-spin shadow-[3px_3px_0px_#000]" />
       </div>
     );
   }
@@ -56,6 +58,7 @@ export default function App() {
               <Route path="/explore" element={<ExplorePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/live" element={<LiveQuizPage />} />
+              <Route path="/thank-you" element={<ThankYouPage />} />
 
               {/* Protected Routes */}
               <Route
@@ -147,8 +150,8 @@ export default function App() {
                 }
               />
 
-              {/* Catch-all */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Catch-all 404 Page */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Router>
         </ToastProvider>

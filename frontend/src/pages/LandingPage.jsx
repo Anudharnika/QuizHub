@@ -1,383 +1,454 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
-import {
-  Zap, ChevronRight, Star, Users, BookOpen, BarChart2, Globe, Trophy,
-  Brain, Play, Check, ArrowRight, Sparkles, Shield
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Sparkles, 
+  HelpCircle, 
+  ArrowRight, 
+  CheckCircle2, 
+  Layers, 
+  FileText, 
+  Zap, 
+  ChevronDown,
+  Brain,
+  Award,
+  Globe,
+  Flame,
+  Edit3,
+  BookOpen
 } from 'lucide-react';
-
-// Animated counter hook
-function useCounter(end, duration = 2000, inView) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = end / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= end) { setCount(end); clearInterval(timer); }
-      else setCount(Math.floor(start));
-    }, 16);
-    return () => clearInterval(timer);
-  }, [end, duration, inView]);
-  return count;
-}
-
-const features = [
-  { icon: Brain, color: 'from-violet-500 to-indigo-500', title: 'Create Powerful Quizzes', desc: 'Build engaging quizzes with 8 question types including MCQ, image-based, fill-in-the-blank, and more.' },
-  { icon: Zap, color: 'from-amber-500 to-orange-500', title: 'Real-Time Quiz Sessions', desc: 'Host live quiz sessions with real-time scoring, dynamic leaderboards, and instant answer feedback.' },
-  { icon: BarChart2, color: 'from-emerald-500 to-teal-500', title: 'Smart Analytics', desc: 'Deep-dive into question accuracy, score distributions, and participant performance trends.' },
-  { icon: BookOpen, color: 'from-blue-500 to-cyan-500', title: 'Question Bank', desc: 'Build a reusable library of questions, filter by category and difficulty, add to any quiz instantly.' },
-  { icon: Globe, color: 'from-pink-500 to-rose-500', title: 'Share Anywhere', desc: 'Share quizzes via unique link, QR code, or social media. Make it public, private, or unlisted.' },
-  { icon: Trophy, color: 'from-indigo-500 to-purple-500', title: 'Track Your Progress', desc: 'Unlock achievements, climb leaderboards, and visualize your learning journey over time.' },
-];
-
-const steps = [
-  { step: '01', title: 'Create a Quiz', desc: 'Use our 5-step builder to craft beautiful quizzes with multiple question types.' },
-  { step: '02', title: 'Share with Anyone', desc: 'Generate a unique link or QR code and share it with your audience instantly.' },
-  { step: '03', title: 'Analyze Results', desc: 'Get deep insights into performance, identify knowledge gaps, and improve.' },
-];
-
-const testimonials = [
-  { name: 'Sarah Chen', role: 'Senior Developer', company: 'TechCorp', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=60', text: 'QuizHub completely transformed how I assess my team\'s knowledge. The analytics dashboard is incredibly powerful and insightful.', rating: 5 },
-  { name: 'Marcus Williams', role: 'University Lecturer', company: 'MIT', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=60', text: 'The real-time quiz mode is a game changer for my lectures. Students are far more engaged and the leaderboard keeps them motivated.', rating: 5 },
-  { name: 'Priya Sharma', role: 'L&D Manager', company: 'StartupXYZ', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=60', text: 'I\'ve tried many quiz platforms, but QuizHub\'s combination of beautiful design and powerful features is unmatched. Highly recommend!', rating: 5 },
-];
-
-const stats = [
-  { value: 50000, suffix: '+', label: 'Quizzes Created' },
-  { value: 2000000, suffix: '+', label: 'Questions Answered' },
-  { value: 120000, suffix: '+', label: 'Active Users' },
-  { value: 98, suffix: '%', label: 'Satisfaction Rate' },
-];
-
-function StatCard({ stat }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  const count = useCounter(stat.value, 2000, inView);
-
-  const fmt = (n) => n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : n >= 1000 ? (n / 1000).toFixed(0) + 'K' : n;
-
-  return (
-    <div ref={ref} className="text-center">
-      <div className="text-4xl font-black text-white">{fmt(count)}{stat.suffix}</div>
-      <div className="text-indigo-200 mt-1 text-sm font-medium">{stat.label}</div>
-    </div>
-  );
-}
-
-const floatingCards = [
-  { title: 'JavaScript Basics', emoji: '🚀', score: '18/20', color: 'from-indigo-500 to-violet-500', delay: 0 },
-  { title: 'World History', emoji: '🌍', score: '15/15', color: 'from-emerald-500 to-teal-500', delay: 0.5 },
-  { title: 'Data Structures', emoji: '🧩', score: '12/15', color: 'from-amber-500 to-orange-500', delay: 1 },
-];
+import { 
+  RotatingBadgeDoodle, 
+  AnimatedHeroCharacter, 
+  AnimatedMaleCharacter, 
+  SparkleStar 
+} from '../components/common/Doodles';
+import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
-  const [hoveredFeature, setHoveredFeature] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [activeFaqTab, setActiveFaqTab] = useState('General');
+  const [openFaqIndex, setOpenFaqIndex] = useState(1);
+  const [emailSub, setEmailSub] = useState('');
+
+  const handleGenerate = (e) => {
+    e.preventDefault();
+    if (aiPrompt.trim()) {
+      navigate(`/create-quiz?prompt=${encodeURIComponent(aiPrompt.trim())}`);
+    } else {
+      navigate('/create-quiz');
+    }
+  };
+
+  const faqData = [
+    {
+      id: 1,
+      category: 'General',
+      question: 'How does it work?',
+      answer: 'QuizHub lets you generate interactive quizzes from any topic, text, or document using advanced AI. You can also craft custom multiple-choice or true/false questions manually and host live sessions with your classmates.'
+    },
+    {
+      id: 2,
+      category: 'General',
+      question: 'Whats our business plan?',
+      answer: 'QuizHub is 100% free for students and educators! We offer optional VIP campus features, custom domain hosting, and unlimited live room participants for college events.'
+    },
+    {
+      id: 3,
+      category: 'General',
+      question: 'Which platforms are we supporting?',
+      answer: 'QuizHub works seamlessly across all web browsers, desktop monitors, tablets, and mobile devices with zero app installation required.'
+    },
+    {
+      id: 4,
+      category: 'Quizzes',
+      question: 'Can I import PDF documents or notes?',
+      answer: 'Yes! Simply upload your PDF, Word document, or text notes into the AI quiz creator, and QuizHub will automatically extract key questions with answer keys.'
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 py-4 bg-slate-950/80 backdrop-blur-md border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
+    <div className="min-h-screen bg-[#FFFDF9] text-slate-900 font-sans selection:bg-[#EC4899] selection:text-white relative overflow-hidden bg-grid-pattern">
+      
+      {/* Top Ticker Ribbon Banner */}
+      <div className="w-full bg-black text-white py-1.5 overflow-hidden border-b-2 border-black">
+        <motion.div 
+          animate={{ x: [0, -1000] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="whitespace-nowrap text-xs font-bold uppercase tracking-widest flex gap-8 items-center"
+        >
+          <span>QuizHub • The Ultimate AI Quiz Platform for College</span>
+          <span>✦ Instant Document to Quiz Conversion</span>
+          <span>Real-time Leaderboards & Live Multiplayer</span>
+          <span>QuizHub • The Ultimate AI Quiz Platform for College</span>
+          <span>✦ Instant Document to Quiz Conversion</span>
+        </motion.div>
+      </div>
+
+      {/* Header Navbar */}
+      <header className="max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between relative z-20">
+        {/* Brand Logo */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] group-hover:rotate-6 transition-transform">
+            C
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">QuizHub</span>
-        </div>
-        <div className="hidden md:flex items-center gap-8">
-          {['Features', 'How it Works', 'Testimonials'].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}
-              className="text-sm text-slate-400 hover:text-white transition-colors">
-              {item}
-            </a>
-          ))}
-        </div>
+          <span className="font-extrabold text-2xl tracking-tight font-display">
+            Quiz<span className="text-[#EC4899]">Hub</span>
+          </span>
+        </Link>
+
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-8 font-bold text-sm">
+          <a href="#quizzes" className="hover:text-[#EC4899] transition-colors">Kind of Quizzes</a>
+          <a href="#features" className="hover:text-[#EC4899] transition-colors">Features</a>
+          <a href="#faq" className="hover:text-[#EC4899] transition-colors">FAQ</a>
+          <Link to="/explore" className="hover:text-[#EC4899] transition-colors">Explore</Link>
+        </nav>
+
+        {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <Link to="/auth" className="text-sm text-slate-300 hover:text-white transition-colors font-medium">Log in</Link>
-          <Link to="/auth?mode=signup"
-            className="btn-primary bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/20">
-            Get Started Free
-          </Link>
+          {user ? (
+            <Link to="/dashboard" className="neo-btn-pink">
+              Dashboard <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth" className="neo-btn-pink text-sm">
+                Get started
+              </Link>
+              <Link to="/auth?mode=login" className="neo-btn-white text-sm hidden sm:inline-flex">
+                Login <ChevronDown className="w-3.5 h-3.5" />
+              </Link>
+            </>
+          )}
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
-        {/* Background gradient blobs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-emerald-600/10 rounded-full blur-[80px]" />
-          {/* Grid */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: 'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-        </div>
+      {/* HERO SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-16 lg:pt-16 lg:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative">
+        
+        {/* Floating background sparkles */}
+        <SparkleStar className="absolute top-10 left-10 w-8 h-8 text-[#EC4899]" />
+        <SparkleStar className="absolute bottom-10 right-1/2 w-6 h-6 text-amber-400" />
 
-        <div className="relative z-10 page-container w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left content */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
-                <Sparkles className="w-4 h-4 text-indigo-400" />
-                <span className="text-sm text-indigo-300 font-medium">Introducing QuizHub 2.0 — Now with Live Mode</span>
-              </div>
-
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight">
-                <span className="text-white">Create.</span><br />
-                <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">Play.</span><br />
-                <span className="text-white">Learn.</span>
-              </h1>
-
-              <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-lg">
-                Build engaging quizzes, challenge your audience, and understand performance with powerful analytics. The next-generation quiz platform for educators, teams, and creators.
-              </p>
-
-              <div className="flex flex-wrap gap-4 mt-8">
-                <Link to="/auth?mode=signup"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-base hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/25 transition-all active:scale-95">
-                  Create a Quiz <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link to="/explore"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/10 text-white font-semibold text-base hover:bg-white/5 transition-all active:scale-95">
-                  <Play className="w-4 h-4" /> Explore Quizzes
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-6 mt-8">
-                <div className="flex -space-x-2">
-                  {['photo-1534528741775-53994a69daeb', 'photo-1507003211169-0a1dd7228f2d', 'photo-1494790108377-be9c29b29330', 'photo-1438761681033-6461ffad8d80'].map((img, i) => (
-                    <img key={i} src={`https://images.unsplash.com/${img}?auto=format&fit=crop&q=80&w=40`}
-                      className="w-8 h-8 rounded-full border-2 border-slate-950 object-cover" alt="user" />
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />)}
-                  </div>
-                  <p className="text-xs text-slate-400 mt-0.5">Loved by 120K+ educators & teams</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right — Floating quiz cards */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
-              className="hidden lg:flex relative justify-center items-center h-[500px]"
-            >
-              {/* Main card */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="relative z-20 w-72 bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-2xl"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">🧠</div>
-                  <div>
-                    <p className="text-xs text-slate-400">Question 3 of 10</p>
-                    <div className="w-32 h-1.5 bg-slate-700 rounded-full mt-1">
-                      <div className="w-[30%] h-full bg-indigo-500 rounded-full" />
-                    </div>
-                  </div>
-                  <div className="ml-auto px-2 py-1 bg-red-500/10 rounded-lg">
-                    <span className="text-red-400 text-xs font-bold">0:45</span>
-                  </div>
-                </div>
-                <p className="text-sm font-semibold text-white mb-4">What is the time complexity of binary search?</p>
-                {['O(n)', 'O(log n)', 'O(n²)', 'O(1)'].map((opt, i) => (
-                  <div key={i}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2 border text-sm transition-all cursor-pointer ${i === 1 ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-700/50 border-slate-600/50 text-slate-300 hover:border-slate-500'}`}>
-                    <span className="w-5 h-5 rounded-md border border-current flex items-center justify-center text-xs font-bold">
-                      {i === 1 ? <Check className="w-3 h-3" /> : String.fromCharCode(65 + i)}
-                    </span>
-                    {opt}
-                  </div>
-                ))}
-              </motion.div>
-
-              {/* Floating mini cards */}
-              {floatingCards.map((card, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ y: [0, -8 - i * 3, 0] }}
-                  transition={{ duration: 3 + i, repeat: Infinity, ease: 'easeInOut', delay: card.delay }}
-                  className={`absolute ${i === 0 ? '-left-4 top-8 z-10' : i === 1 ? '-right-4 top-32 z-10' : 'right-8 bottom-8 z-10'} w-44 bg-slate-800/80 backdrop-blur-xl rounded-xl border border-white/10 p-3 shadow-xl`}
-                >
-                  <div className={`w-6 h-6 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-sm mb-2`}>
-                    {card.emoji}
-                  </div>
-                  <p className="text-xs font-semibold text-white">{card.title}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Score: {card.score}</p>
-                  <div className="flex items-center gap-1 mt-1.5">
-                    {[...Array(5)].map((_, j) => <Star key={j} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />)}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+        {/* Left Hero Content */}
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+          className="lg:col-span-7 space-y-6"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-black bg-amber-100 text-xs font-black shadow-[2px_2px_0px_#000]">
+            <Sparkles className="w-3.5 h-3.5 text-[#EC4899]" /> Next-Gen AI Quiz Creator
           </div>
-        </div>
-      </section>
 
-      {/* Stats */}
-      <section className="py-20 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 animate-gradient-x">
-        <div className="page-container">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                <StatCard stat={stat} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight leading-[1.05]">
+            Best <span className="neo-tag-pink font-black px-3 py-1 my-1 inline-block">AI Platform</span> To Convert Documents To Quiz Instantly
+          </h1>
 
-      {/* Features */}
-      <section id="features" className="py-24 bg-slate-950">
-        <div className="page-container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white">Everything you need to quiz better</h2>
-            <p className="mt-4 text-slate-400 text-lg max-w-xl mx-auto">
-              From quiz creation to advanced analytics — QuizHub has every tool you need to educate, engage, and inspire.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                onMouseEnter={() => setHoveredFeature(i)}
-                onMouseLeave={() => setHoveredFeature(null)}
-                className="relative p-6 rounded-2xl border border-white/5 bg-slate-900 hover:border-indigo-500/30 transition-all group cursor-default overflow-hidden"
-              >
-                {hoveredFeature === i && (
-                  <motion.div layoutId="feature-hover" className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 rounded-2xl" />
-                )}
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="py-24 bg-slate-900">
-        <div className="page-container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white">Get started in 3 simple steps</h2>
-            <p className="mt-4 text-slate-400 text-lg">Build and share your first quiz in under 5 minutes.</p>
-          </motion.div>
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-12 left-[calc(33%+32px)] right-[calc(33%+32px)] h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500" />
-            {steps.map((step, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                className="flex flex-col items-center text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-indigo-500/30">
-                  {step.step}
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-slate-400 text-sm">{step.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-24 bg-slate-950">
-        <div className="page-container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white">Loved by educators & teams</h2>
-          </motion.div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 rounded-2xl bg-slate-800/50 border border-white/5 hover:border-indigo-500/30 transition-all"
-              >
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(t.rating)].map((_, j) => <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{t.name}</p>
-                    <p className="text-xs text-slate-400">{t.role} at {t.company}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-24 bg-gradient-to-br from-indigo-900 via-violet-900 to-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: 'radial-gradient(white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="relative page-container text-center">
-          <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
-            Ready to transform how you quiz?
-          </h2>
-          <p className="text-slate-300 text-lg mb-8 max-w-xl mx-auto">
-            Join over 120,000 educators, trainers, and teams who use QuizHub to create, share, and analyze their quizzes.
+          <p className="text-slate-600 font-medium text-lg sm:text-xl max-w-2xl leading-relaxed">
+            With QuizHub all teachers and students can generate big and small Quizzes in seconds and host them live across college domains!
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/auth?mode=signup"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-indigo-700 font-bold text-lg hover:bg-indigo-50 shadow-xl transition-all active:scale-95">
-              Start for Free <ChevronRight className="w-5 h-5" />
+
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link to={user ? "/create-quiz" : "/auth"} className="neo-btn-pink text-lg px-8 py-3.5">
+              Get Started <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link to="/explore" className="neo-btn-white text-lg px-7 py-3.5">
+              Explore Quizzes <ChevronDown className="w-4 h-4" />
             </Link>
           </div>
+
+          <div className="pt-2 flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <a href="#faq" className="hover:underline text-slate-700">Have any question?</a>
+          </div>
         </motion.div>
+
+        {/* Right Hero Graphic with Doodle */}
+        <div className="lg:col-span-5 flex justify-center relative">
+          {/* Rotating badge floating on side */}
+          <RotatingBadgeDoodle 
+            text="Learn more about service • " 
+            icon={Flame} 
+            className="absolute -top-6 -left-6 z-20" 
+          />
+
+          <AnimatedHeroCharacter />
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 border-t border-white/5 py-12">
-        <div className="page-container">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-white" />
+      {/* KIND OF QUIZZES GRID SECTION */}
+      <section id="quizzes" className="max-w-7xl mx-auto px-4 sm:px-8 py-16 border-t-2 border-black/10">
+        <div className="text-center space-y-3 mb-12">
+          <h2 className="text-3xl sm:text-5xl font-extrabold font-display">Kind of Quizzes</h2>
+          <p className="text-slate-600 font-medium text-lg">Create or take any style of interactive test in seconds</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Card 1: Multiple Choice */}
+          <motion.div 
+            whileHover={{ y: -5, x: -2 }}
+            className="neo-box p-6 flex items-start gap-4 cursor-pointer"
+            onClick={() => navigate('/create-quiz')}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
+              ?
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold font-display">Multiple Choice</h3>
+              <p className="text-slate-500 text-sm mt-1 font-medium leading-relaxed">
+                Standard single or multi-correct answer options with instant explanations and timed questions.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Card 2: Fill in the blank */}
+          <motion.div 
+            whileHover={{ y: -5, x: -2 }}
+            className="neo-box p-6 flex items-start gap-4 cursor-pointer"
+            onClick={() => navigate('/create-quiz')}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500 border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
+              <Edit3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold font-display">Fill in the blank</h3>
+              <p className="text-slate-500 text-sm mt-1 font-medium leading-relaxed">
+                Test recall and exact definitions with smart text-matching algorithms.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Card 3: Matching */}
+          <motion.div 
+            whileHover={{ y: -5, x: -2 }}
+            className="neo-box p-6 flex items-start gap-4 cursor-pointer"
+            onClick={() => navigate('/create-quiz')}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-amber-400 border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
+              <Zap className="w-6 h-6 text-black" />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold font-display">Matching Pair</h3>
+              <p className="text-slate-500 text-sm mt-1 font-medium leading-relaxed">
+                Match terms to definitions, formulas to answers, or concepts to diagrams.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Card 4: True / False */}
+          <motion.div 
+            whileHover={{ y: -5, x: -2 }}
+            className="neo-box p-6 flex items-start gap-4 cursor-pointer"
+            onClick={() => navigate('/create-quiz')}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-purple-500 border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold font-display">True / False</h3>
+              <p className="text-slate-500 text-sm mt-1 font-medium leading-relaxed">
+                Fast-paced rapid fire boolean questions perfect for live host tournaments.
+              </p>
+            </div>
+          </motion.div>
+
+        </div>
+      </section>
+
+      {/* FEATURE HIGHLIGHT BANNER SECTION */}
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+        <div className="bg-white border-[3px] border-black rounded-[2.5rem] p-8 sm:p-12 shadow-[8px_8px_0px_#000] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <div className="lg:col-span-5 flex justify-center">
+            <AnimatedMaleCharacter />
+          </div>
+
+          <div className="lg:col-span-7 space-y-6">
+            <h2 className="text-3xl sm:text-5xl font-black font-display leading-tight">
+              We help you to make the best Quizzes
+            </h2>
+            <p className="text-slate-600 font-medium text-lg leading-relaxed">
+              Find, explore and learn in an awesome place! Teachers and students can host live lobbies, record grades, analyze performance metrics, and compete on global campus leaderboards.
+            </p>
+            <div>
+              <Link to="/auth" className="neo-btn-pink text-lg px-8 py-3.5">
+                Get Started <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* FREQUENTLY ASKED QUESTIONS SECTION */}
+      <section id="faq" className="max-w-5xl mx-auto px-4 sm:px-8 py-16 relative">
+        {/* Floating Rotating Doodle */}
+        <RotatingBadgeDoodle 
+          text="Learn more about service • " 
+          icon={HelpCircle} 
+          className="absolute -top-6 -right-2 z-20" 
+        />
+
+        <div className="neo-box p-6 sm:p-10 relative">
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-center mb-8">
+            Frequently asked questions
+          </h2>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            {['General', 'Quizzes', 'Templates', 'Account'].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveFaqTab(cat)}
+                className={`px-5 py-2 rounded-full font-bold text-sm border-2 border-black transition-all ${
+                  activeFaqTab === cat 
+                    ? 'bg-[#EC4899] text-white shadow-[3px_3px_0px_#000]' 
+                    : 'bg-white text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Accordion list */}
+          <div className="space-y-4">
+            {faqData.map((item, index) => (
+              <div key={item.id} className="border-b-2 border-slate-200 pb-4">
+                <button
+                  onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                  className="w-full flex items-center justify-between text-left font-bold text-lg py-2 hover:text-[#EC4899] transition-colors"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-xs font-black text-[#EC4899]">0{index + 1}</span>
+                    {item.question}
+                  </span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${openFaqIndex === index ? 'rotate-180 text-[#EC4899]' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {openFaqIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-slate-600 text-sm font-medium pt-2 pb-1 leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <span className="font-bold text-white">QuizHub</span>
-              <span className="text-slate-500 text-sm">· Create. Play. Learn.</span>
-            </div>
-            <div className="flex items-center gap-4">
-              {[Globe, Shield, Sparkles].map((Icon, i) => (
-                <a key={i} href="#" className="text-slate-500 hover:text-white transition-colors">
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
-            <p className="text-slate-500 text-sm">© 2026 QuizHub. All rights reserved.</p>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* LETS MAKE FIRST QUIZ CTA BANNER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+        <div className="relative bg-[#EC4899] border-[3px] border-black rounded-[2.5rem] p-8 sm:p-14 shadow-[8px_8px_0px_#000] text-center text-white overflow-hidden">
+          
+          {/* Corner Sparkle Doodles */}
+          <SparkleStar className="absolute top-6 left-6 w-8 h-8 text-amber-300" />
+          <SparkleStar className="absolute bottom-6 right-6 w-8 h-8 text-amber-300" />
+
+          <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white mb-3">
+            Lets Make First Quiz
+          </h2>
+
+          <p className="text-white/90 font-bold text-base sm:text-lg max-w-xl mx-auto mb-8">
+            Type whatever topic you want as a quiz in the following input, then we make the best AI quiz instantly.
+          </p>
+
+          {/* AI Prompt Input Bar */}
+          <form onSubmit={handleGenerate} className="max-w-xl mx-auto relative">
+            <div className="bg-white border-2 border-black rounded-full p-2 flex items-center shadow-[4px_4px_0px_#000]">
+              <input
+                type="text"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Give me something to generate quiz..."
+                className="flex-1 px-5 py-2.5 text-slate-900 font-medium text-sm focus:outline-none bg-transparent"
+              />
+              <button
+                type="submit"
+                className="bg-[#EC4899] text-white font-extrabold text-sm px-6 py-2.5 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-[#DB2777] active:translate-y-0.5 transition-all"
+              >
+                Generate
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="w-full bg-[#F8FAFC] border-t-2 border-black py-12 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          
+          {/* Logo & Tagline */}
+          <div className="md:col-span-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-lg">
+                C
+              </div>
+              <span className="font-extrabold text-xl font-display">CreateMyTest / QuizHub</span>
+            </div>
+            <p className="text-xs font-bold text-slate-500">Make quizzes with us across college campus</p>
+          </div>
+
+          {/* Quick Footer Links */}
+          <div className="md:col-span-5 grid grid-cols-3 gap-4 text-xs font-bold text-slate-700">
+            <div className="space-y-2">
+              <div>About</div>
+              <div>Projects</div>
+            </div>
+            <div className="space-y-2">
+              <div>What We Do</div>
+              <div>Templates</div>
+            </div>
+            <div className="space-y-2">
+              <div>Jobs</div>
+              <div>Download</div>
+            </div>
+          </div>
+
+          {/* Newsletter Subscription */}
+          <div className="md:col-span-3 space-y-2">
+            <div className="text-xs font-extrabold uppercase tracking-wider text-slate-800">JOIN OUR COMMUNITY</div>
+            <form onSubmit={(e) => { e.preventDefault(); setEmailSub(''); alert('Subscribed!'); }} className="flex items-center">
+              <div className="bg-white border-2 border-black rounded-full p-1 flex items-center w-full shadow-[2px_2px_0px_#000]">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={emailSub}
+                  onChange={(e) => setEmailSub(e.target.value)}
+                  className="w-full px-3 py-1 text-xs text-slate-900 focus:outline-none bg-transparent"
+                />
+                <button type="submit" className="w-7 h-7 rounded-full bg-[#EC4899] text-white flex items-center justify-center font-bold text-xs border border-black flex-shrink-0">
+                  ➔
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-200 text-center text-xs font-bold text-slate-400">
+          Copyright © 2026 QuizHub. All rights reserved.
+        </div>
       </footer>
+
     </div>
   );
 }

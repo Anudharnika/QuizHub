@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Database, PlusCircle, Search, Filter, Tag, Check, X,
-  ChevronDown, ChevronUp, BookOpen, Layers, Type, Trash2, HelpCircle
+  Database, PlusCircle, Search, Tag, Check, X,
+  ChevronDown, ChevronUp, BookOpen
 } from 'lucide-react';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { questionBankAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { SparkleStar, RotatingBadgeDoodle } from '../components/common/Doodles';
 
 const CATEGORIES = ['All', 'Programming', 'Mathematics', 'Science', 'General Knowledge', 'History', 'Aptitude', 'AI & ML', 'Web Development'];
 const DIFFICULTIES = ['All', 'Easy', 'Intermediate', 'Hard'];
-
-const DIFF_COLORS = {
-  Easy: 'difficulty-easy',
-  Intermediate: 'difficulty-intermediate',
-  Hard: 'difficulty-hard'
-};
 
 export default function QuestionBankPage() {
   const { toast } = useToast();
@@ -48,7 +43,7 @@ export default function QuestionBankPage() {
       if (category !== 'All') params.category = category;
       if (difficulty !== 'All') params.difficulty = difficulty;
       const res = await questionBankAPI.getAll(params);
-      setQuestions(res.data);
+      setQuestions(res.data || []);
     } catch (err) {
       console.error('Failed to load questions', err);
     } finally {
@@ -97,7 +92,7 @@ export default function QuestionBankPage() {
       });
       fetchQuestions();
     } catch (err) {
-      toast.error('Failed to add question', err?.response?.data?.message || 'Please try again.');
+      toast.error('Failed to add question', err?.message || 'Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -106,25 +101,22 @@ export default function QuestionBankPage() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-6 pb-12">
+        
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                <Database className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Question Bank</h1>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Centralized repository of verified questions to import into any quiz.
-                </p>
-              </div>
-            </div>
+            <span className="neo-tag-pink text-xs uppercase mb-1">Central Repository</span>
+            <h1 className="text-3xl font-black text-slate-900 font-display tracking-tight flex items-center gap-2 mt-1">
+              <Database className="w-7 h-7 text-[#EC4899]" /> Question Bank
+            </h1>
+            <p className="text-slate-600 font-medium text-sm mt-1">
+              Verified campus questions ready to import into any quiz.
+            </p>
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="btn-primary self-start sm:self-auto"
+            className="neo-btn-pink py-2.5 px-5 text-sm self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" /> Add to Bank
           </button>
@@ -133,20 +125,20 @@ export default function QuestionBankPage() {
         {/* Filters and Search */}
         <div className="flex flex-wrap items-center gap-3">
           <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[240px] relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Search question bank by keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input pl-10 pr-4"
+              className="w-full pl-10 pr-4 py-2.5 text-sm rounded-full border-2 border-black font-bold text-slate-900 placeholder-slate-400 bg-white shadow-[2px_2px_0px_#000] focus:ring-2 focus:ring-[#EC4899]"
             />
           </form>
 
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            className="input w-auto text-sm"
+            className="px-4 py-2.5 rounded-full border-2 border-black font-extrabold text-xs bg-white shadow-[2px_2px_0px_#000]"
           >
             {DIFFICULTIES.map(d => (
               <option key={d} value={d}>Difficulty: {d}</option>
@@ -160,10 +152,10 @@ export default function QuestionBankPage() {
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full font-extrabold text-xs border-2 border-black transition-all ${
                 category === c
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                  : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                  ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]'
+                  : 'bg-white text-slate-800 hover:bg-slate-100'
               }`}
             >
               {c}
@@ -174,54 +166,57 @@ export default function QuestionBankPage() {
         {/* Question List */}
         {loading ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="card p-5 animate-pulse flex flex-col gap-2">
-                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/4" />
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="neo-box p-5 animate-pulse bg-white">
+                <div className="h-4 bg-slate-200 rounded w-2/3 mb-2" />
+                <div className="h-3 bg-slate-200 rounded w-1/4" />
               </div>
             ))}
           </div>
         ) : questions.length === 0 ? (
-          <div className="card text-center py-16">
-            <Database className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">No questions found</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Try relaxing filters or add a new question to the bank.</p>
-            <button onClick={() => setShowModal(true)} className="btn-primary mt-4 mx-auto text-xs">
+          <div className="neo-box p-12 text-center bg-white">
+            <RotatingBadgeDoodle text="Empty Question Bank • " icon={BookOpen} className="mx-auto mb-4" />
+            <h3 className="text-xl font-black font-display text-slate-900">No questions found</h3>
+            <p className="text-slate-500 font-medium text-xs mt-1">Try relaxing filters or add a new question to the bank.</p>
+            <button onClick={() => setShowModal(true)} className="neo-btn-pink mt-4 text-xs py-2 px-5">
               <PlusCircle className="w-4 h-4" /> Add Question
             </button>
           </div>
         ) : (
           <div className="space-y-3">
             {questions.map((q, idx) => {
-              const isExpanded = expandedId === q._id;
+              const isExpanded = expandedId === q.id || expandedId === q._id;
+              const qId = q.id || q._id;
               return (
                 <div
-                  key={q._id || idx}
-                  className="card p-5 hover:border-slate-300 dark:hover:border-slate-600 transition-all cursor-pointer"
-                  onClick={() => setExpandedId(isExpanded ? null : q._id)}
+                  key={qId || idx}
+                  className="neo-box p-5 bg-white cursor-pointer hover:translate-y-[-2px]"
+                  onClick={() => setExpandedId(isExpanded ? null : qId)}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="badge badge-slate">{q.type || 'MCQ'}</span>
-                        <span className={`badge ${DIFF_COLORS[q.difficulty] || 'badge-slate'}`}>
+                        <span className="neo-tag-pink text-[10px] uppercase">{q.type || 'MCQ'}</span>
+                        <span className="px-2.5 py-0.5 rounded-full border border-black font-bold text-[10px] bg-amber-300">
                           {q.difficulty}
                         </span>
-                        <span className="badge badge-indigo">{q.category}</span>
+                        <span className="px-2.5 py-0.5 rounded-full border border-black font-bold text-[10px] bg-purple-100">
+                          {q.category}
+                        </span>
                         {(q.tags || []).map((t, ti) => (
-                          <span key={ti} className="text-[11px] text-slate-400 flex items-center gap-0.5">
-                            <Tag className="w-3 h-3" /> {t}
+                          <span key={ti} className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5">
+                            <Tag className="w-3 h-3 text-[#EC4899]" /> {t}
                           </span>
                         ))}
                       </div>
 
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white leading-snug">
+                      <p className="text-sm font-extrabold text-slate-900 font-display leading-snug">
                         {q.questionText}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <button className="text-slate-400 hover:text-slate-600 p-1">
+                      <button className="p-1 text-black font-black">
                         {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                       </button>
                     </div>
@@ -234,25 +229,25 @@ export default function QuestionBankPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/80 space-y-3 text-xs"
+                        className="mt-4 pt-4 border-t-2 border-black space-y-3 text-xs font-bold"
                       >
                         {q.options && q.options.length > 0 && (
                           <div>
-                            <p className="font-semibold text-slate-500 mb-2">Options:</p>
+                            <p className="font-extrabold text-slate-500 mb-2 uppercase text-[10px]">Options:</p>
                             <div className="grid sm:grid-cols-2 gap-2">
                               {q.options.map((opt, oi) => {
                                 const isCorrect = q.correctAnswer === opt;
                                 return (
                                   <div
                                     key={oi}
-                                    className={`px-3 py-2 rounded-xl border flex items-center justify-between ${
+                                    className={`p-2.5 rounded-xl border-2 border-black flex items-center justify-between font-bold ${
                                       isCorrect
-                                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 font-semibold'
-                                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                                        ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]'
+                                        : 'bg-slate-50 text-slate-800'
                                     }`}
                                   >
                                     <span>{String.fromCharCode(65 + oi)}. {opt}</span>
-                                    {isCorrect && <Check className="w-4 h-4 text-emerald-500" />}
+                                    {isCorrect && <Check className="w-4 h-4 text-white" />}
                                   </div>
                                 );
                               })}
@@ -261,8 +256,8 @@ export default function QuestionBankPage() {
                         )}
 
                         {q.explanation && (
-                          <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-indigo-900 dark:text-indigo-300">
-                            <span className="font-bold">Explanation: </span>
+                          <div className="p-3 rounded-xl border-2 border-black bg-amber-100 text-slate-900 font-medium">
+                            <span className="font-extrabold font-display">Explanation: </span>
                             {q.explanation}
                           </div>
                         )}
@@ -283,34 +278,34 @@ export default function QuestionBankPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto"
+                className="bg-white neo-box max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Add Question to Bank</h2>
-                  <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
+                <div className="flex items-center justify-between mb-4 border-b-2 border-black pb-3">
+                  <h2 className="text-xl font-black font-display text-slate-900">Add Question to Bank</h2>
+                  <button onClick={() => setShowModal(false)} className="text-black font-bold">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <form onSubmit={handleCreateQuestion} className="space-y-4">
                   <div>
-                    <label className="label">Question Text *</label>
+                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Question Text *</label>
                     <textarea
                       value={modalForm.questionText}
                       onChange={(e) => setModalForm({ ...modalForm, questionText: e.target.value })}
                       rows={3}
                       placeholder="e.g., What is the virtual DOM in React?"
-                      className="input resize-none"
+                      className="w-full p-3 border-2 border-black rounded-xl font-bold text-sm"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="label">Category</label>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Category</label>
                       <select
                         value={modalForm.category}
                         onChange={(e) => setModalForm({ ...modalForm, category: e.target.value })}
-                        className="input text-xs"
+                        className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-xs"
                       >
                         {CATEGORIES.filter(c => c !== 'All').map(c => (
                           <option key={c} value={c}>{c}</option>
@@ -319,11 +314,11 @@ export default function QuestionBankPage() {
                     </div>
 
                     <div>
-                      <label className="label">Difficulty</label>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Difficulty</label>
                       <select
                         value={modalForm.difficulty}
                         onChange={(e) => setModalForm({ ...modalForm, difficulty: e.target.value })}
-                        className="input text-xs"
+                        className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-xs"
                       >
                         <option value="Easy">Easy</option>
                         <option value="Intermediate">Intermediate</option>
@@ -333,17 +328,17 @@ export default function QuestionBankPage() {
                   </div>
 
                   <div>
-                    <label className="label">Options & Mark Correct Answer</label>
+                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Options & Select Correct Answer</label>
                     <div className="space-y-2">
                       {modalForm.options.map((opt, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => setModalForm({ ...modalForm, correctAnswer: opt })}
-                            className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center text-xs font-bold transition-all ${
+                            className={`w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center text-xs font-black transition-all ${
                               modalForm.correctAnswer === opt && opt !== ''
-                                ? 'bg-emerald-500 border-emerald-500 text-white'
-                                : 'border-slate-300 dark:border-slate-600 text-slate-400'
+                                ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]'
+                                : 'bg-slate-100 text-black'
                             }`}
                           >
                             {modalForm.correctAnswer === opt && opt !== '' ? <Check className="w-4 h-4" /> : String.fromCharCode(65 + i)}
@@ -357,7 +352,7 @@ export default function QuestionBankPage() {
                               setModalForm({ ...modalForm, options: opts });
                             }}
                             placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                            className="input flex-1 text-xs"
+                            className="flex-1 px-3 py-2 border-2 border-black rounded-xl font-bold text-xs"
                           />
                         </div>
                       ))}
@@ -365,39 +360,28 @@ export default function QuestionBankPage() {
                   </div>
 
                   <div>
-                    <label className="label">Explanation (Optional)</label>
+                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Explanation (Optional)</label>
                     <textarea
                       value={modalForm.explanation}
                       onChange={(e) => setModalForm({ ...modalForm, explanation: e.target.value })}
                       rows={2}
                       placeholder="Why is this answer correct?"
-                      className="input resize-none text-xs"
+                      className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-xs"
                     />
                   </div>
 
-                  <div>
-                    <label className="label">Tags (comma separated)</label>
-                    <input
-                      type="text"
-                      value={modalForm.tags}
-                      onChange={(e) => setModalForm({ ...modalForm, tags: e.target.value })}
-                      placeholder="React, JavaScript, Frontend"
-                      className="input text-xs"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
                     <button
                       type="button"
                       onClick={() => setShowModal(false)}
-                      className="btn-secondary text-xs"
+                      className="neo-btn-white text-xs py-2 px-4"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="btn-primary text-xs"
+                      className="neo-btn-pink text-xs py-2 px-5"
                     >
                       {submitting ? 'Saving...' : 'Save Question'}
                     </button>

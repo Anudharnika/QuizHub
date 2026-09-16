@@ -1,101 +1,291 @@
-import axios from 'axios';
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy, 
+  limit,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  sendPasswordResetEmail,
+  updateProfile as updateFbProfile 
+} from 'firebase/auth';
+import { db, auth } from '../config/firebase';
 
-const getApiBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl) return '/api';
-  const cleanUrl = envUrl.trim().replace(/\/+$/, '');
-  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+// Helper to convert Firestore snap doc to object with ID
+const formatDoc = (snapshotDoc) => {
+  if (!snapshotDoc.exists()) return null;
+  return { id: snapshotDoc.id, ...snapshotDoc.data() };
 };
 
-const API_BASE = getApiBaseUrl();
+// Helper to convert collection snap to array
+const formatDocs = (snapshot) => {
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
 
-const api = axios.create({
-  baseURL: API_BASE,
-  timeout: 15000,
-});
-
-// Attach JWT token to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('quizhub_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Handle 401 globally
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('quizhub_token');
-      localStorage.removeItem('quizhub_user');
-      window.location.href = '/auth';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
-
-// Auth
+// Auth Services
 export const authAPI = {
-  signup: (data) => api.post('/auth/signup', data),
-  login: (data) => api.post('/auth/login', data),
-  getMe: () => api.get('/auth/me'),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (data) => api.post('/auth/reset-password', data),
+  signup: async ({ name, email, password }) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateFbProfile(cred.user, { displayName: name });
+    const userData = {
+      id: cred.user.uid,
+      uid: cred.user.uid,
+      name,
+      email,
+      role: 'user',
+      createdAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'users', cred.user.uid), userData);
+    return { data: userData };
+  },
+  login: async ({ email, password }) => {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
+    const data = userDoc.exists() ? userDoc.data() : { id: cred.user.uid, email: cred.user.email };
+    return { data };
+  },
+  getMe: async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('Not authenticated');
+    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+    return { data: userDoc.exists() ? userDoc.data() : { id: currentUser.uid, email: currentUser.email } };
+  },
+  forgotPassword: async (email) => {
+    await sendPasswordResetEmail(auth, email);
+    return { data: { message: 'Password reset email sent' } };
+  },
+  resetPassword: async () => {
+    return { data: { message: 'Use Firebase email link to reset password' } };
+  },
 };
 
-// Quizzes
+// Quiz Services
 export const quizAPI = {
-  getAll: (params) => api.get('/quizzes', { params }),
-  getById: (id) => api.get(`/quizzes/${id}`),
-  create: (data) => api.post('/quizzes', data),
-  update: (id, data) => api.put(`/quizzes/${id}`, data),
-  delete: (id) => api.delete(`/quizzes/${id}`),
+  getAll: async (params = {}) => {
+    const colRef = collection(db, 'quizzes');
+    let q = query(colRef);
+    if (params.category && params.category !== 'All') {
+      q = query(colRef, where('category', '==', params.category));
+    }
+    const snap = await getDocs(q);
+    let list = formatDocs(snap);
+    if (params.search) {
+      const searchLower = params.search.toLowerCase();
+      list = list.filter((item) => item.title?.toLowerCase().includes(searchLower) || item.description?.toLowerCase().includes(searchLower));
+    }
+    return { data: list };
+  },
+  getById: async (id) => {
+    const snap = await getDoc(doc(db, 'quizzes', id));
+    if (!snap.exists()) throw new Error('Quiz not found');
+    return { data: formatDoc(snap) };
+  },
+  create: async (data) => {
+    const currentUser = auth.currentUser;
+    const newQuiz = {
+      ...data,
+      createdBy: currentUser ? currentUser.uid : 'anonymous',
+      createdAt: new Date().toISOString(),
+    };
+    const docRef = await addDoc(collection(db, 'quizzes'), newQuiz);
+    return { data: { id: docRef.id, ...newQuiz } };
+  },
+  update: async (id, data) => {
+    const docRef = doc(db, 'quizzes', id);
+    await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString() });
+    const snap = await getDoc(docRef);
+    return { data: formatDoc(snap) };
+  },
+  delete: async (id) => {
+    await deleteDoc(doc(db, 'quizzes', id));
+    return { data: { success: true } };
+  },
 };
 
-// Question Bank
+// Question Bank Services
 export const questionBankAPI = {
-  getAll: (params) => api.get('/question-bank', { params }),
-  create: (data) => api.post('/question-bank', data),
-  getCategories: () => api.get('/categories'),
+  getAll: async (params = {}) => {
+    const colRef = collection(db, 'questionBank');
+    const snap = await getDocs(colRef);
+    let list = formatDocs(snap);
+    if (params.category && params.category !== 'All') {
+      list = list.filter((q) => q.category === params.category);
+    }
+    return { data: list };
+  },
+  create: async (data) => {
+    const docRef = await addDoc(collection(db, 'questionBank'), {
+      ...data,
+      createdAt: new Date().toISOString(),
+    });
+    return { data: { id: docRef.id, ...data } };
+  },
+  getCategories: async () => {
+    const snap = await getDocs(collection(db, 'questionBank'));
+    const categories = Array.from(new Set(snap.docs.map((d) => d.data().category).filter(Boolean)));
+    return { data: categories };
+  },
 };
 
-// Attempts
+// Attempt Services
 export const attemptAPI = {
-  submit: (data) => api.post('/attempts', data),
-  getById: (id) => api.get(`/attempts/${id}`),
-  getUserAttempts: () => api.get('/attempts/user'),
+  submit: async (data) => {
+    const currentUser = auth.currentUser;
+    const attemptData = {
+      ...data,
+      userId: currentUser ? currentUser.uid : data.userId || 'guest',
+      userName: currentUser ? (currentUser.displayName || currentUser.email) : (data.userName || 'Guest Player'),
+      submittedAt: new Date().toISOString(),
+    };
+    const docRef = await addDoc(collection(db, 'attempts'), attemptData);
+    return { data: { id: docRef.id, ...attemptData } };
+  },
+  getById: async (id) => {
+    const snap = await getDoc(doc(db, 'attempts', id));
+    if (!snap.exists()) throw new Error('Attempt not found');
+    return { data: formatDoc(snap) };
+  },
+  getUserAttempts: async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return { data: [] };
+    const q = query(collection(db, 'attempts'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    return { data: formatDocs(snap) };
+  },
 };
 
-// Analytics
+// Analytics Services
 export const analyticsAPI = {
-  getMe: () => api.get('/analytics/me'),
-  getQuiz: (quizId) => api.get(`/analytics/quiz/${quizId}`),
+  getMe: async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return { data: { totalQuizzesTaken: 0, averageScore: 0, highestScore: 0 } };
+    const q = query(collection(db, 'attempts'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    const attempts = formatDocs(snap);
+    const total = attempts.length;
+    const avgScore = total > 0 ? Math.round(attempts.reduce((acc, a) => acc + (a.score || 0), 0) / total) : 0;
+    const highestScore = total > 0 ? Math.max(...attempts.map((a) => a.score || 0)) : 0;
+    return {
+      data: {
+        totalQuizzesTaken: total,
+        averageScore: avgScore,
+        highestScore: highestScore,
+        recentAttempts: attempts.slice(-5),
+      },
+    };
+  },
+  getQuiz: async (quizId) => {
+    const q = query(collection(db, 'attempts'), where('quizId', '==', quizId));
+    const snap = await getDocs(q);
+    const attempts = formatDocs(snap);
+    const totalAttempts = attempts.length;
+    const avgScore = totalAttempts > 0 ? Math.round(attempts.reduce((acc, a) => acc + (a.score || 0), 0) / totalAttempts) : 0;
+    return {
+      data: {
+        quizId,
+        totalAttempts,
+        averageScore: avgScore,
+        attempts,
+      },
+    };
+  },
 };
 
-// Leaderboard
+// Leaderboard Services
 export const leaderboardAPI = {
-  get: (params) => api.get('/leaderboard', { params }),
+  get: async (params = {}) => {
+    const colRef = collection(db, 'attempts');
+    let q = query(colRef, orderBy('score', 'desc'), limit(params.limit ? parseInt(params.limit) : 20));
+    try {
+      const snap = await getDocs(q);
+      return { data: formatDocs(snap) };
+    } catch {
+      // Fallback query if index is building
+      const snap = await getDocs(colRef);
+      const list = formatDocs(snap).sort((a, b) => (b.score || 0) - (a.score || 0));
+      return { data: list.slice(0, 20) };
+    }
+  },
 };
 
-// Notifications
+// Notification Services
 export const notificationAPI = {
-  getAll: () => api.get('/notifications'),
-  markRead: (id) => api.put(`/notifications/${id}/read`),
-  markAllRead: () => api.put('/notifications/read-all'),
+  getAll: async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return { data: [] };
+    const q = query(collection(db, 'notifications'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    return { data: formatDocs(snap) };
+  },
+  markRead: async (id) => {
+    await updateDoc(doc(db, 'notifications', id), { read: true });
+    return { data: { success: true } };
+  },
+  markAllRead: async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return { data: { success: true } };
+    const q = query(collection(db, 'notifications'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    const updatePromises = snap.docs.map((d) => updateDoc(doc(db, 'notifications', d.id), { read: true }));
+    await Promise.all(updatePromises);
+    return { data: { success: true } };
+  },
 };
 
-// Admin
+// Admin Services
 export const adminAPI = {
-  getStats: () => api.get('/admin/stats'),
-  getUsers: () => api.get('/admin/users'),
-  deleteQuiz: (id) => api.delete(`/admin/quizzes/${id}`),
+  getStats: async () => {
+    const [usersSnap, quizzesSnap, attemptsSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'quizzes')),
+      getDocs(collection(db, 'attempts')),
+    ]);
+    return {
+      data: {
+        totalUsers: usersSnap.size,
+        totalQuizzes: quizzesSnap.size,
+        totalAttempts: attemptsSnap.size,
+      },
+    };
+  },
+  getUsers: async () => {
+    const snap = await getDocs(collection(db, 'users'));
+    return { data: formatDocs(snap) };
+  },
+  deleteQuiz: async (id) => {
+    await deleteDoc(doc(db, 'quizzes', id));
+    return { data: { success: true } };
+  },
 };
 
-// User profile
+// User Profile Services
 export const userAPI = {
-  updateProfile: (data) => api.put('/users/profile', data),
+  updateProfile: async (data) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('Not authenticated');
+    await updateDoc(doc(db, 'users', currentUser.uid), data);
+    return { data: { success: true } };
+  },
+};
+
+export default {
+  auth: authAPI,
+  quiz: quizAPI,
+  questionBank: questionBankAPI,
+  attempt: attemptAPI,
+  analytics: analyticsAPI,
+  leaderboard: leaderboardAPI,
+  notification: notificationAPI,
+  admin: adminAPI,
+  user: userAPI,
 };

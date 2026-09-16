@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User, Settings } from 'lucide-react';
+import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User, Settings, Sparkles, Radio, CheckCircle2, XCircle, Info, Trophy, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -58,43 +58,42 @@ export default function TopNav() {
     setUnreadCount(0);
   };
 
-  const notifIcons = { success: '✅', error: '❌', info: 'ℹ️', badge: '🏆', warning: '⚠️' };
+  const notifIconMap = { success: CheckCircle2, error: XCircle, info: Info, badge: Trophy, warning: AlertTriangle };
+  const notifColorMap = { success: 'text-emerald-500', error: 'text-red-500', info: 'text-blue-500', badge: 'text-amber-500', warning: 'text-amber-500' };
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center px-4 sm:px-6 gap-4 sticky top-0 z-30">
-      {/* Search */}
-      <form onSubmit={handleSearch} className="flex-1 max-w-md ml-10 lg:ml-0">
+    <header className="h-18 bg-[#FFFDF9] border-b-2 border-black flex items-center px-4 sm:px-8 gap-4 sticky top-0 z-30 shadow-[0px_2px_0px_#000]">
+      
+      {/* Search Input */}
+      <form onSubmit={handleSearch} className="flex-1 max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             placeholder="Search quizzes, topics..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            className="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-white border-2 border-black font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EC4899] shadow-[2px_2px_0px_#000]"
           />
         </div>
       </form>
 
-      <div className="ml-auto flex items-center gap-2">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          title={isDark ? 'Light mode' : 'Dark mode'}
-        >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+      <div className="ml-auto flex items-center gap-3">
+        
+        {/* Live Arena Quick Button */}
+        <Link to="/live" className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-black bg-amber-300 font-extrabold text-xs shadow-[2px_2px_0px_#000] hover:translate-y-[-1px]">
+          <Radio className="w-3.5 h-3.5 text-black animate-pulse" /> Live Arena
+        </Link>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="relative p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000] text-black hover:bg-slate-50 transition-all"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#EC4899] text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black shadow-[1px_1px_0px_#000]">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -107,31 +106,31 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50"
+                className="absolute right-0 top-12 w-80 neo-box p-0 overflow-hidden z-50 bg-white"
               >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                  <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Notifications</h3>
+                <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black bg-amber-100">
+                  <h3 className="font-extrabold text-slate-900 text-sm font-display">Notifications</h3>
                   {unreadCount > 0 && (
-                    <button onClick={handleMarkAllRead} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                    <button onClick={handleMarkAllRead} className="text-xs font-bold text-[#EC4899] hover:underline">
                       Mark all read
                     </button>
                   )}
                 </div>
                 <div className="max-h-72 overflow-y-auto scrollbar-thin">
                   {notifications.length === 0 ? (
-                    <div className="py-8 text-center text-slate-400 text-sm">No notifications yet</div>
+                    <div className="py-8 text-center text-slate-400 font-bold text-xs">No notifications yet</div>
                   ) : (
                     notifications.slice(0, 8).map(n => (
                       <div
-                        key={n._id}
-                        className={`flex items-start gap-3 px-4 py-3 border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors ${!n.isRead ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''}`}
+                        key={n.id || n._id}
+                        className={`flex items-start gap-3 px-4 py-3 border-b border-black/10 hover:bg-slate-50 transition-colors ${!n.isRead ? 'bg-pink-50' : ''}`}
                       >
-                        <span className="text-lg mt-0.5">{notifIcons[n.type] || 'ℹ️'}</span>
+                        {(() => { const Icon = notifIconMap[n.type] || Info; return <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${notifColorMap[n.type] || 'text-blue-500'}`} />; })()}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{n.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{n.message}</p>
+                          <p className="text-xs font-extrabold text-slate-900">{n.title}</p>
+                          <p className="text-[11px] font-medium text-slate-600 mt-0.5 truncate">{n.message}</p>
                         </div>
-                        {!n.isRead && <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />}
+                        {!n.isRead && <span className="w-2.5 h-2.5 rounded-full bg-[#EC4899] border border-black mt-1.5 flex-shrink-0" />}
                       </div>
                     ))
                   )}
@@ -141,21 +140,21 @@ export default function TopNav() {
           </AnimatePresence>
         </div>
 
-        {/* User menu */}
+        {/* User Dropdown Menu */}
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-slate-50 transition-all"
           >
             <img
               src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`}
               alt={user?.name}
-              className="w-8 h-8 rounded-full object-cover"
+              className="w-7 h-7 rounded-full border border-black object-cover"
             />
-            <span className="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+            <span className="hidden sm:block text-xs font-black text-slate-900 max-w-[100px] truncate font-display">
               {user?.name?.split(' ')[0]}
             </span>
-            <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+            <ChevronDown className="w-3.5 h-3.5 text-black hidden sm:block" />
           </button>
 
           <AnimatePresence>
@@ -165,23 +164,23 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute right-0 top-12 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50"
+                className="absolute right-0 top-12 w-52 neo-box p-0 overflow-hidden z-50 bg-white"
               >
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                <div className="px-4 py-3 border-b-2 border-black bg-pink-100">
+                  <p className="text-xs font-extrabold text-slate-900 truncate font-display">{user?.name}</p>
+                  <p className="text-[11px] font-bold text-slate-600 truncate">{user?.email}</p>
                 </div>
-                <div className="py-1">
+                <div className="p-1">
                   <Link to="/profile" onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <User className="w-4 h-4" /> Profile
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
+                    <User className="w-4 h-4 text-[#EC4899]" /> Profile
                   </Link>
                   <Link to="/settings" onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <Settings className="w-4 h-4" /> Settings
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
+                    <Settings className="w-4 h-4 text-purple-600" /> Settings
                   </Link>
                   <button onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                     <LogOut className="w-4 h-4" /> Log out
                   </button>
                 </div>
@@ -189,6 +188,7 @@ export default function TopNav() {
             )}
           </AnimatePresence>
         </div>
+
       </div>
     </header>
   );

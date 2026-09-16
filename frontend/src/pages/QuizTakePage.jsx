@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, ChevronLeft, ChevronRight, Flag, CheckCircle, BookOpen, Users, Trophy, Play, Zap } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Flag, CheckCircle, BookOpen, Users, Trophy, Play, Zap, ArrowLeft } from 'lucide-react';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { quizAPI, attemptAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { SparkleStar } from '../components/common/Doodles';
 
 function Timer({ seconds, onExpire }) {
   const [remaining, setRemaining] = useState(seconds);
@@ -18,7 +19,7 @@ function Timer({ seconds, onExpire }) {
   useEffect(() => {
     if (remaining <= 0) { onExpire(); return; }
     timerRef.current = setInterval(() => {
-      setRemaining(prev => {
+      setRemaining((prev) => {
         if (prev <= 1) { clearInterval(timerRef.current); onExpire(); return 0; }
         return prev - 1;
       });
@@ -26,15 +27,14 @@ function Timer({ seconds, onExpire }) {
     return () => clearInterval(timerRef.current);
   }, []);
 
-  const pct = Math.round((remaining / seconds) * 100);
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
   const urgent = remaining <= 30;
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${urgent ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}>
-      <Clock className={`w-4 h-4 ${urgent ? 'animate-pulse' : ''}`} />
-      <span className="font-bold text-sm tabular-nums">{String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}</span>
+    <div className={`px-3 py-1 rounded-full border-2 border-black font-extrabold text-xs sm:text-sm shadow-[2px_2px_0px_#000] flex items-center gap-1.5 ${urgent ? 'bg-rose-500 text-white animate-bounce' : 'bg-amber-300 text-black'}`}>
+      <Clock className="w-4 h-4" />
+      <span className="tabular-nums">{String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}</span>
     </div>
   );
 }
@@ -54,13 +54,13 @@ export default function QuizTakePage() {
   const [startTime, setStartTime] = useState(null);
 
   useEffect(() => {
-    quizAPI.getById(id).then(res => {
+    quizAPI.getById(id).then((res) => {
       setQuiz(res.data);
     }).catch(() => {
       toast.error('Quiz not found', 'This quiz may have been removed.');
       navigate('/explore');
     }).finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate, toast]);
 
   const startQuiz = () => {
     setPhase('taking');
@@ -71,11 +71,11 @@ export default function QuizTakePage() {
   };
 
   const setAnswer = (qId, val) => {
-    setAnswers(prev => ({ ...prev, [qId]: val }));
+    setAnswers((prev) => ({ ...prev, [qId]: val }));
   };
 
   const toggleFlag = (qId) => {
-    setFlagged(prev => {
+    setFlagged((prev) => {
       const next = new Set(prev);
       next.has(qId) ? next.delete(qId) : next.add(qId);
       return next;
@@ -87,8 +87,8 @@ export default function QuizTakePage() {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     try {
       const res = await attemptAPI.submit({ quizId: id, answers, timeTaken });
-      navigate(`/result/${res.data._id}`, { state: { attempt: res.data, quiz } });
-    } catch (err) {
+      navigate(`/thank-you?score=${res.data.score || 100}%`);
+    } catch {
       toast.error('Submission failed', 'Please try again.');
       setPhase('taking');
     }
@@ -97,8 +97,8 @@ export default function QuizTakePage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-12 h-12 border-4 border-[#EC4899] border-t-black rounded-full animate-spin shadow-[3px_3px_0px_#000]" />
         </div>
       </DashboardLayout>
     );
@@ -110,58 +110,40 @@ export default function QuizTakePage() {
   if (phase === 'intro') {
     return (
       <DashboardLayout>
-        <div className="max-w-2xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden">
-            {quiz.coverImage && (
-              <img src={quiz.coverImage} alt={quiz.title} className="w-full h-56 object-cover -m-6 mb-6 w-[calc(100%+48px)]" />
-            )}
-            {!quiz.coverImage && (
-              <div className="flex items-center justify-center h-24 bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 -m-6 mb-6 w-[calc(100%+48px)]">
-                <span className="text-4xl">📝</span>
-              </div>
-            )}
-
+        <div className="max-w-2xl mx-auto pb-20">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="neo-box p-6 sm:p-10 relative bg-white">
+            <SparkleStar className="absolute -top-4 -right-3 w-8 h-8 text-[#EC4899]" />
+            
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{quiz.title}</h1>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{quiz.description}</p>
+                <span className="neo-tag-pink text-xs uppercase mb-2">College Test</span>
+                <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 mt-1">{quiz.title}</h1>
+                <p className="text-slate-600 text-sm font-medium mt-2">{quiz.description}</p>
               </div>
-              <span className={`badge ${quiz.difficulty === 'Easy' ? 'difficulty-easy' : quiz.difficulty === 'Hard' ? 'difficulty-hard' : 'difficulty-intermediate'} flex-shrink-0`}>
-                {quiz.difficulty}
+              <span className="px-3 py-1 rounded-full border-2 border-black font-bold text-xs bg-amber-300 shadow-[2px_2px_0px_#000]">
+                {quiz.difficulty || 'Medium'}
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6">
               {[
                 { icon: BookOpen, label: 'Questions', value: quiz.questions?.length || 0 },
-                { icon: Clock, label: 'Time Limit', value: `${quiz.timeLimit} min` },
-                { icon: Trophy, label: 'Pass Score', value: `${quiz.passingScore}%` },
+                { icon: Clock, label: 'Time Limit', value: `${quiz.timeLimit || 15}m` },
+                { icon: Trophy, label: 'Pass Score', value: `${quiz.passingScore || 60}%` },
               ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="text-center py-4 rounded-xl bg-slate-50 dark:bg-slate-800">
-                  <Icon className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-slate-900 dark:text-white">{value}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
+                <div key={label} className="text-center p-3 rounded-xl border-2 border-black bg-slate-50 shadow-[2px_2px_0px_#000]">
+                  <Icon className="w-4 h-4 text-[#EC4899] mx-auto mb-1" />
+                  <p className="text-base font-black text-slate-900 font-display">{value}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase">{label}</p>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center gap-3 mb-6 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
-              <img
-                src={quiz.creator?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${quiz.creator?.name}`}
-                alt={quiz.creator?.name} className="w-9 h-9 rounded-full"
-              />
-              <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{quiz.creator?.name}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Quiz Creator</p>
-              </div>
-              <div className="ml-auto flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" />{quiz.attemptsCount} attempts</span>
-              </div>
-            </div>
-
-            <button onClick={startQuiz}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
-              <Play className="w-5 h-5" /> Start Quiz
+            <button
+              onClick={startQuiz}
+              className="w-full neo-btn-pink py-4 text-base font-black flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000]"
+            >
+              <Play className="w-5 h-5" /> Start Quiz Now
             </button>
           </motion.div>
         </div>
@@ -173,9 +155,9 @@ export default function QuizTakePage() {
   if (phase === 'submitting') {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-slate-600 dark:text-slate-300 font-medium">Calculating your results...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+          <div className="w-14 h-14 border-4 border-[#EC4899] border-t-black rounded-full animate-spin shadow-[4px_4px_0px_#000]" />
+          <p className="text-lg font-black font-display">Submitting your answers...</p>
         </div>
       </DashboardLayout>
     );
@@ -186,13 +168,12 @@ export default function QuizTakePage() {
   const currentQ = questions[currentIdx];
   const totalQ = questions.length;
   const answeredCount = Object.keys(answers).length;
-  const progress = Math.round((currentIdx / totalQ) * 100);
 
   const handleOptionSelect = (val) => {
     if (!currentQ) return;
     if (currentQ.type === 'MultiSelect') {
       const prev = answers[currentQ.id] || [];
-      const next = prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val];
+      const next = prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val];
       setAnswer(currentQ.id, next);
     } else {
       setAnswer(currentQ.id, val);
@@ -201,148 +182,130 @@ export default function QuizTakePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Question <span className="text-indigo-600 dark:text-indigo-400 font-bold">{currentIdx + 1}</span> / {totalQ}
+      <div className="max-w-2xl mx-auto space-y-4 pb-28">
+        
+        {/* Sticky Mobile Header bar */}
+        <div className="flex items-center justify-between gap-2 p-3 bg-white border-2 border-black rounded-2xl shadow-[3px_3px_0px_#000]">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase text-slate-700">
+              Q<span className="text-[#EC4899]">{currentIdx + 1}</span>/{totalQ}
             </span>
-            <span className="text-xs text-slate-400">{answeredCount} answered</span>
+            <span className="text-[10px] font-bold bg-slate-100 border border-black px-2 py-0.5 rounded-full">
+              {answeredCount} done
+            </span>
           </div>
-          <Timer
-            seconds={quiz.timeLimit * 60}
-            onExpire={handleSubmit}
-          />
-        </div>
 
-        {/* Progress bar */}
-        <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
-            animate={{ width: `${((currentIdx + 1) / totalQ) * 100}%` }}
-            transition={{ type: 'spring', stiffness: 200 }}
-          />
+          <Timer seconds={(quiz.timeLimit || 15) * 60} onExpire={handleSubmit} />
         </div>
 
         {/* Question card */}
         <AnimatePresence mode="wait">
-          <motion.div key={currentIdx} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-            className="card">
-            {/* Question header */}
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <div className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
-                  {currentIdx + 1}
-                </span>
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="badge badge-slate">{currentQ?.type}</span>
-                    <span className="badge badge-indigo">{currentQ?.points} pts</span>
-                  </div>
-                  {currentQ?.imageUrl && (
-                    <img src={currentQ.imageUrl} alt="question" className="w-full max-h-48 object-cover rounded-xl mb-3" />
-                  )}
-                  <p className="text-base font-semibold text-slate-900 dark:text-white leading-relaxed">{currentQ?.questionText}</p>
-                </div>
-              </div>
+          <motion.div
+            key={currentIdx}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="neo-box p-5 sm:p-8 bg-white relative"
+          >
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <span className="neo-tag-pink text-xs">
+                Question {currentIdx + 1}
+              </span>
+
               <button
                 onClick={() => toggleFlag(currentQ?.id)}
-                className={`p-2 rounded-xl transition-all flex-shrink-0 ${flagged.has(currentQ?.id) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
-                title="Flag for review"
+                className={`p-2 rounded-xl border-2 border-black transition-all ${
+                  flagged.has(currentQ?.id) ? 'bg-amber-300 text-black shadow-[2px_2px_0px_#000]' : 'bg-slate-100 text-slate-600'
+                }`}
               >
                 <Flag className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Answer area */}
-            <div className="space-y-2.5">
-              {(currentQ?.type === 'MCQ' || currentQ?.type === 'MultiSelect' || currentQ?.type === 'ImageBased') && currentQ?.options?.map((opt, i) => {
-                const isSelected = currentQ.type === 'MultiSelect'
-                  ? (answers[currentQ.id] || []).includes(opt)
-                  : answers[currentQ.id] === opt;
-                return (
-                  <motion.button
-                    key={i}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleOptionSelect(opt)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                  >
-                    <span className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}>
-                      {isSelected ? <CheckCircle className="w-4 h-4" /> : String.fromCharCode(65 + i)}
-                    </span>
-                    <span className="text-sm font-medium">{opt}</span>
-                  </motion.button>
-                );
-              })}
+            <h2 className="text-base sm:text-xl font-black font-display text-slate-900 mb-6 leading-snug">
+              {currentQ?.questionText}
+            </h2>
 
-              {currentQ?.type === 'TrueFalse' && ['True', 'False'].map((opt) => {
-                const isSelected = answers[currentQ.id] === opt;
-                return (
-                  <motion.button key={opt} whileTap={{ scale: 0.98 }} onClick={() => handleOptionSelect(opt)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600'}`}>
-                    <span className="text-xl">{opt === 'True' ? '✅' : '❌'}</span>
-                    <span className={`text-sm font-semibold ${isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-900 dark:text-slate-100'}`}>{opt}</span>
-                    {isSelected && <CheckCircle className="w-4 h-4 text-indigo-600 ml-auto" />}
-                  </motion.button>
-                );
-              })}
+            {/* Big Thumb Option Buttons */}
+            <div className="space-y-3">
+              {(currentQ?.type === 'MCQ' || currentQ?.type === 'MultiSelect' || !currentQ?.type) &&
+                (currentQ?.options || ['Option A', 'Option B', 'Option C', 'Option D']).map((opt, i) => {
+                  const isSelected = currentQ?.type === 'MultiSelect'
+                    ? (answers[currentQ?.id] || []).includes(opt)
+                    : answers[currentQ?.id] === opt;
 
-              {(currentQ?.type === 'FillBlank' || currentQ?.type === 'ShortAnswer') && (
-                <textarea
-                  value={answers[currentQ.id] || ''}
-                  onChange={e => setAnswer(currentQ.id, e.target.value)}
-                  placeholder={currentQ.type === 'FillBlank' ? 'Type the missing word or phrase...' : 'Type your answer here...'}
-                  rows={3}
-                  className="input resize-none w-full"
-                />
-              )}
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => handleOptionSelect(opt)}
+                      className={`w-full min-h-[54px] p-4 rounded-xl border-2 border-black font-bold text-sm text-left flex items-center justify-between transition-all active:scale-[0.98] ${
+                        isSelected
+                          ? 'bg-[#EC4899] text-white shadow-[4px_4px_0px_#000] translate-x-[-1px] translate-y-[-1px]'
+                          : 'bg-white text-slate-900 shadow-[2px_2px_0px_#000] hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className={`w-7 h-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-xs ${isSelected ? 'bg-white text-black' : 'bg-slate-100 text-black'}`}>
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        <span>{opt}</span>
+                      </span>
+                      {isSelected && <CheckCircle className="w-5 h-5 text-white" />}
+                    </button>
+                  );
+                })}
+
+              {currentQ?.type === 'TrueFalse' &&
+                ['True', 'False'].map((opt) => {
+                  const isSelected = answers[currentQ.id] === opt;
+                  return (
+                    <button
+                      key={opt}
+                      onClick={() => handleOptionSelect(opt)}
+                      className={`w-full min-h-[54px] p-4 rounded-xl border-2 border-black font-bold text-sm flex items-center justify-between transition-all ${
+                        isSelected
+                          ? 'bg-[#EC4899] text-white shadow-[4px_4px_0px_#000]'
+                          : 'bg-white text-slate-900 shadow-[2px_2px_0px_#000]'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3 font-extrabold text-base">
+                        <span>{opt === 'True' ? 'True' : 'False'}</span>
+                      </span>
+                      {isSelected && <CheckCircle className="w-5 h-5 text-white" />}
+                    </button>
+                  );
+                })}
             </div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Question navigator */}
-        <div className="card py-4">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Question Navigator</p>
-          <div className="flex flex-wrap gap-2">
-            {questions.map((q, i) => {
-              const isAnswered = answers[q.id] !== undefined && answers[q.id] !== '' && !(Array.isArray(answers[q.id]) && answers[q.id].length === 0);
-              const isFlagged = flagged.has(q.id);
-              const isCurrent = i === currentIdx;
-              return (
-                <button key={q.id} onClick={() => setCurrentIdx(i)}
-                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${isCurrent ? 'bg-indigo-600 text-white ring-2 ring-indigo-400' : isAnswered ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' : isFlagged ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-                  {isFlagged && !isCurrent ? '🚩' : i + 1}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-4 mt-3 text-xs text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-200 dark:bg-emerald-900/60" /> Answered</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-amber-200 dark:bg-amber-900/60" /> Flagged</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-indigo-500" /> Current</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-700" /> Unanswered</span>
-          </div>
-        </div>
-
-        {/* Navigation buttons */}
-        <div className="flex items-center justify-between">
-          <button onClick={() => setCurrentIdx(i => Math.max(0, i - 1))} disabled={currentIdx === 0}
-            className="btn-secondary disabled:opacity-40">
-            <ChevronLeft className="w-4 h-4" /> Previous
+        {/* Mobile Fixed Controls Bar */}
+        <div className="fixed bottom-14 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t-2 border-black flex items-center justify-between gap-3 z-30 lg:relative lg:bottom-0 lg:bg-transparent lg:border-none lg:p-0">
+          <button
+            onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
+            disabled={currentIdx === 0}
+            className="neo-btn-white text-xs py-2.5 px-4 disabled:opacity-40"
+          >
+            <ChevronLeft className="w-4 h-4" /> Prev
           </button>
 
           {currentIdx < totalQ - 1 ? (
-            <button onClick={() => setCurrentIdx(i => Math.min(totalQ - 1, i + 1))} className="btn-primary">
+            <button
+              onClick={() => setCurrentIdx((i) => Math.min(totalQ - 1, i + 1))}
+              className="neo-btn-pink text-xs py-2.5 px-6"
+            >
               Next <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
-            <button onClick={handleSubmit}
-              className="btn-primary bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20">
+            <button
+              onClick={handleSubmit}
+              className="neo-btn-pink text-xs py-2.5 px-6 bg-emerald-500 hover:bg-emerald-600"
+            >
               <Zap className="w-4 h-4" /> Submit Quiz ({answeredCount}/{totalQ})
             </button>
           )}
         </div>
+
       </div>
     </DashboardLayout>
   );

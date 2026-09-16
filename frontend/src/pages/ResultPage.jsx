@@ -136,7 +136,7 @@ export default function ResultPage() {
           </div>
 
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            {passed ? 'Outstanding Job! 🎉' : 'Good Effort! Keep Practicing 💪'}
+            {passed ? 'Outstanding Job!' : 'Good Effort! Keep Practicing'}
           </h1>
           <p className="text-slate-600 dark:text-slate-300 mt-1 max-w-md mx-auto text-sm">
             {passed
@@ -323,7 +323,7 @@ export default function ResultPage() {
                       {/* Explanation */}
                       {q.explanation && (isExpanded || !q.isCorrect) && (
                         <div className="mt-2 p-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-900 dark:text-indigo-300">
-                          <span className="font-bold block mb-0.5">💡 Explanation:</span>
+                          <span className="font-bold block mb-0.5">Explanation:</span>
                           {q.explanation}
                         </div>
                       )}

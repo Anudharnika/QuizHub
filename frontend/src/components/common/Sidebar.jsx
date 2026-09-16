@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, BookOpen, PlusCircle, Database, Compass, BarChart2,
-  Trophy, User, Settings, LogOut, Zap, ChevronLeft, ChevronRight, Shield, Menu, X
+  Trophy, User, Settings, LogOut, Zap, ChevronLeft, ChevronRight, Shield, Menu, X, Radio
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,10 +11,19 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard' },
   { icon: BookOpen, label: 'My Quizzes', to: '/my-quizzes' },
   { icon: PlusCircle, label: 'Create Quiz', to: '/create-quiz', highlight: true },
+  { icon: Radio, label: 'Live Arena', to: '/live' },
   { icon: Database, label: 'Question Bank', to: '/question-bank' },
   { icon: Compass, label: 'Explore', to: '/explore' },
   { icon: BarChart2, label: 'Analytics', to: '/analytics' },
   { icon: Trophy, label: 'Leaderboard', to: '/leaderboard' },
+];
+
+const mobileBottomNav = [
+  { icon: LayoutDashboard, label: 'Home', to: '/dashboard' },
+  { icon: BookOpen, label: 'Quizzes', to: '/my-quizzes' },
+  { icon: PlusCircle, label: 'Create', to: '/create-quiz', highlight: true },
+  { icon: Radio, label: 'Live', to: '/live' },
+  { icon: Trophy, label: 'Ranks', to: '/leaderboard' },
 ];
 
 const bottomItems = [
@@ -39,89 +48,43 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     <Link
       to={item.to}
       onClick={() => setMobileOpen(false)}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative
-        ${isActive(item.to)
-          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
+      className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-extrabold transition-all duration-150 border-2 ${
+        isActive(item.to)
+          ? 'bg-[#EC4899] text-white border-black shadow-[3px_3px_0px_#000]'
           : item.highlight
-            ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
-            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-100'
-        }`}
+          ? 'bg-amber-400 text-black border-black shadow-[2px_2px_0px_#000]'
+          : 'bg-white text-slate-800 border-transparent hover:border-black hover:shadow-[2px_2px_0px_#000]'
+      }`}
     >
-      <item.icon className={`w-5 h-5 flex-shrink-0 ${item.highlight && !isActive(item.to) ? 'text-indigo-500' : ''}`} />
-      {!isCollapsed && <span className="truncate">{item.label}</span>}
-      {isCollapsed && (
-        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-          {item.label}
-        </div>
-      )}
+      <item.icon className="w-5 h-5 flex-shrink-0" />
+      {!isCollapsed && <span className="truncate font-display">{item.label}</span>}
     </Link>
-  );
-
-  const SidebarContent = ({ isCollapsed }) => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className={`flex items-center gap-2.5 px-3 py-4 ${isCollapsed ? 'justify-center' : ''}`}>
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
-          <Zap className="w-4 h-4 text-white" />
-        </div>
-        {!isCollapsed && (
-          <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-            QuizHub
-          </span>
-        )}
-      </div>
-
-      {/* Nav items */}
-      <nav className="flex-1 px-2 py-2 space-y-1 overflow-y-auto scrollbar-thin">
-        {navItems.map(item => <NavItem key={item.to} item={item} isCollapsed={isCollapsed} />)}
-
-        {user?.role === 'admin' && (
-          <NavItem item={{ icon: Shield, label: 'Admin', to: '/admin' }} isCollapsed={isCollapsed} />
-        )}
-      </nav>
-
-      {/* Bottom items */}
-      <div className="px-2 pb-4 space-y-1 border-t border-slate-100 dark:border-slate-700 pt-3">
-        {bottomItems.map(item => <NavItem key={item.to} item={item} isCollapsed={isCollapsed} />)}
-
-        {/* User info */}
-        <div className={`flex items-center gap-3 px-3 py-2.5 mt-1 ${isCollapsed ? 'justify-center' : ''}`}>
-          <img
-            src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`}
-            alt={user?.name}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-indigo-100 dark:ring-indigo-900"
-          />
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user?.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate capitalize">{user?.role}</p>
-            </div>
-          )}
-          {!isCollapsed && (
-            <button
-              onClick={handleLogout}
-              className="text-slate-400 hover:text-red-500 transition-colors"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
   );
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700"
-      >
-        <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-      </button>
+      {/* Mobile Top Header Bar */}
+      <div className="lg:hidden sticky top-0 z-30 bg-[#FFFDF9] border-b-2 border-black px-4 py-3 flex items-center justify-between shadow-[0px_2px_0px_#000]">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000]"
+        >
+          <Menu className="w-5 h-5 text-black" />
+        </button>
 
-      {/* Mobile overlay */}
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-base shadow-[2px_2px_0px_#000]">
+            C
+          </div>
+          <span className="font-black text-xl font-display">QuizHub</span>
+        </Link>
+
+        <Link to="/profile" className="w-8 h-8 rounded-full border-2 border-black overflow-hidden shadow-[1px_1px_0px_#000]">
+          <img src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`} alt="user" className="w-full h-full object-cover" />
+        </Link>
+      </div>
+
+      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -129,44 +92,108 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-black/50 z-40"
+              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              initial={{ x: -280 }}
+              initial={{ x: -300 }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: -300 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 z-50 shadow-2xl"
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-[#FFFDF9] border-r-3 border-black z-50 shadow-2xl flex flex-col p-4"
             >
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <SidebarContent isCollapsed={false} />
+              <div className="flex items-center justify-between pb-4 border-b-2 border-black mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-lg shadow-[2px_2px_0px_#000]">
+                    C
+                  </div>
+                  <span className="font-black text-xl font-display">QuizHub Menu</span>
+                </div>
+                <button onClick={() => setMobileOpen(false)} className="p-1 text-black font-bold">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {navItems.map((item) => (
+                  <NavItem key={item.to} item={item} isCollapsed={false} />
+                ))}
+                {user?.role === 'admin' && (
+                  <NavItem item={{ icon: Shield, label: 'Admin', to: '/admin' }} isCollapsed={false} />
+                )}
+              </div>
+
+              <div className="pt-4 border-t-2 border-black space-y-2">
+                {bottomItems.map((item) => (
+                  <NavItem key={item.to} item={item} isCollapsed={false} />
+                ))}
+                <button
+                  onClick={handleLogout}
+                  className="w-full neo-btn-white py-2 text-xs flex items-center justify-center gap-2 text-red-600"
+                >
+                  <LogOut className="w-4 h-4" /> Log Out
+                </button>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar */}
+      {/* Desktop Sidebar */}
       <motion.aside
-        animate={{ width: collapsed ? 72 : 240 }}
+        animate={{ width: collapsed ? 80 : 260 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="hidden lg:flex flex-col h-screen bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700 sticky top-0 overflow-hidden flex-shrink-0"
+        className="hidden lg:flex flex-col h-screen bg-[#FFFDF9] border-r-3 border-black sticky top-0 overflow-hidden flex-shrink-0 z-30 p-4 justify-between"
       >
-        <SidebarContent isCollapsed={collapsed} />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-4 border-b-2 border-black">
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000]">
+                C
+              </div>
+              {!collapsed && <span className="font-black text-2xl font-display">QuizHub</span>}
+            </Link>
+          </div>
 
-        {/* Collapse toggle */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors z-10"
-        >
-          {collapsed ? <ChevronRight className="w-3 h-3 text-slate-500" /> : <ChevronLeft className="w-3 h-3 text-slate-500" />}
-        </button>
+          <nav className="space-y-2 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-thin">
+            {navItems.map((item) => (
+              <NavItem key={item.to} item={item} isCollapsed={collapsed} />
+            ))}
+            {user?.role === 'admin' && (
+              <NavItem item={{ icon: Shield, label: 'Admin', to: '/admin' }} isCollapsed={collapsed} />
+            )}
+          </nav>
+        </div>
+
+        <div className="space-y-2 pt-3 border-t-2 border-black">
+          {bottomItems.map((item) => (
+            <NavItem key={item.to} item={item} isCollapsed={collapsed} />
+          ))}
+        </div>
       </motion.aside>
+
+      {/* Mobile Bottom Quick Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-black px-2 py-1.5 flex items-center justify-around shadow-[0px_-4px_0px_#000]">
+        {mobileBottomNav.map((item) => {
+          const active = isActive(item.to);
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`flex flex-col items-center justify-center p-1.5 rounded-xl font-bold text-[10px] transition-all ${
+                active 
+                  ? 'bg-[#EC4899] text-white border-1.5 border-black shadow-[2px_2px_0px_#000]' 
+                  : item.highlight
+                  ? 'bg-amber-300 text-black border-1.5 border-black'
+                  : 'text-slate-700'
+              }`}
+            >
+              <item.icon className="w-5 h-5 mb-0.5" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </>
   );
 }

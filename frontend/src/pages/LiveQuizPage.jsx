@@ -1,23 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Zap, Users, Play, Trophy, Clock, CheckCircle, XCircle, ArrowRight,
-  LogOut, Crown, Sparkles, Volume2
+  Zap, Users, Play, Trophy, Clock, ArrowRight, Sparkles, Radio
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { quizAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { SparkleStar, RotatingBadgeDoodle } from '../components/common/Doodles';
 
-// 4 Kahoot-style color themes for options
 const OPTION_COLORS = [
-  { bg: 'bg-rose-500 hover:bg-rose-600 border-rose-600', text: 'text-white', shape: '▲' },
-  { bg: 'bg-blue-500 hover:bg-blue-600 border-blue-600', text: 'text-white', shape: '◆' },
-  { bg: 'bg-amber-500 hover:bg-amber-600 border-amber-600', text: 'text-white', shape: '●' },
-  { bg: 'bg-emerald-500 hover:bg-emerald-600 border-emerald-600', text: 'text-white', shape: '■' },
+  { bg: 'bg-[#EC4899] text-white', shape: '▲' },
+  { bg: 'bg-blue-500 text-white', shape: '◆' },
+  { bg: 'bg-amber-400 text-black', shape: '●' },
+  { bg: 'bg-emerald-500 text-white', shape: '■' },
 ];
 
 export default function LiveQuizPage() {
@@ -27,9 +26,7 @@ export default function LiveQuizPage() {
 
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  // Mode: 'select' | 'lobby' | 'playing' | 'ended'
   const [role, setRole] = useState(hostQuizId ? 'host' : 'player');
   const [gameCode, setGameCode] = useState(joinCodeParam);
   const [playerName, setPlayerName] = useState(user?.name || '');
@@ -47,14 +44,12 @@ export default function LiveQuizPage() {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    // Load quizzes if host needs to choose
     quizAPI.getAll().then(res => {
-      setAvailableQuizzes(res.data);
+      setAvailableQuizzes(res.data || []);
       if (hostQuizId) setSelectedQuiz(hostQuizId);
-      else if (res.data.length > 0) setSelectedQuiz(res.data[0]._id);
+      else if (res.data?.length > 0) setSelectedQuiz(res.data[0].id || res.data[0]._id);
     }).catch(() => {});
 
-    // Init socket
     const getSocketUrl = () => {
       const envUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
       if (!envUrl) return '/';
@@ -69,16 +64,16 @@ export default function LiveQuizPage() {
     const socket = io(getSocketUrl(), { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
 
-    socket.on('session_created', ({ code, quiz }) => {
+    socket.on('session_created', ({ code }) => {
       setGameCode(code);
       setGameState('lobby');
-      toast.success('Live Session Created!', `Room code: ${code}`);
+      toast.success('Room Created!', `Room PIN: ${code}`);
     });
 
-    socket.on('joined_session', ({ code, quiz }) => {
+    socket.on('joined_session', ({ code }) => {
       setGameCode(code);
       setGameState('lobby');
-      toast.success('Joined lobby!', 'Waiting for host to start the game.');
+      toast.success('Joined Lobby!', 'Waiting for host to start the game.');
     });
 
     socket.on('participants_updated', ({ participants }) => {
@@ -107,10 +102,6 @@ export default function LiveQuizPage() {
       setMyAnswerResult(result);
     });
 
-    socket.on('leaderboard_update', ({ participants }) => {
-      setParticipants(participants);
-    });
-
     socket.on('quiz_ended', ({ scores }) => {
       setFinalScores(scores);
       setGameState('ended');
@@ -119,21 +110,17 @@ export default function LiveQuizPage() {
       } catch (e) {}
     });
 
-    socket.on('error', ({ message }) => {
-      toast.error('Game Error', message);
-    });
-
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [hostQuizId, toast]);
 
   const handleCreateSession = () => {
     if (!selectedQuiz) {
-      toast.error('Quiz required', 'Please pick a quiz to host.');
+      toast.error('Quiz required', 'Please select a quiz to host.');
       return;
     }
-    socketRef.current.emit('create_session', {
+    socketRef.current?.emit('create_session', {
       quizId: selectedQuiz,
       hostName: user?.name || 'Host'
     });
@@ -149,141 +136,120 @@ export default function LiveQuizPage() {
       toast.error('Name required', 'Please enter your nickname.');
       return;
     }
-    socketRef.current.emit('join_session', {
+    socketRef.current?.emit('join_session', {
       code: gameCode,
       playerName: playerName.trim()
     });
   };
 
   const handleStartGame = () => {
-    socketRef.current.emit('start_session', { code: gameCode });
+    socketRef.current?.emit('start_session', { code: gameCode });
   };
 
   const handleNextQuestion = () => {
-    socketRef.current.emit('next_question', { code: gameCode });
+    socketRef.current?.emit('next_question', { code: gameCode });
   };
 
   const handleEndGame = () => {
-    socketRef.current.emit('end_session', { code: gameCode });
+    socketRef.current?.emit('end_session', { code: gameCode });
   };
 
   const handleSelectAnswer = (option) => {
     if (hasAnswered) return;
     setHasAnswered(true);
-    socketRef.current.emit('submit_live_answer', {
+    socketRef.current?.emit('submit_live_answer', {
       code: gameCode,
-      questionId: currentQuestion.id,
+      questionId: currentQuestion?.id,
       answer: option
     });
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto pb-12">
-        {/* ========================================================= */}
-        {/* SCREEN 1: SELECT MODE / INITIAL SETUP                     */}
-        {/* ========================================================= */}
+      <div className="max-w-4xl mx-auto space-y-6 pb-16">
+        
+        {/* ================= SCREEN 1: SETUP ================= */}
         {gameState === 'select' && (
           <div className="space-y-6">
-            <div className="text-center max-w-lg mx-auto mb-8">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/25">
-                <Zap className="w-8 h-8" />
-              </div>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white">Live Multiplayer Arena</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-                Host a real-time multiplayer competition or enter a 6-digit PIN to play with friends!
+            <div className="text-center max-w-lg mx-auto relative pt-4">
+              <RotatingBadgeDoodle text="Live Multiplayer Arena • " icon={Zap} className="mx-auto mb-4" />
+              <h1 className="text-4xl font-black text-slate-900 font-display">Live Multiplayer Arena</h1>
+              <p className="text-sm font-bold text-slate-600 mt-2">
+                Host a real-time multiplayer competition or enter a 6-digit PIN to join!
               </p>
             </div>
 
-            {/* Role switch tab */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl max-w-xs mx-auto mb-8">
+            {/* Role Switcher Tabs */}
+            <div className="flex border-2 border-black rounded-full p-1 max-w-xs mx-auto bg-slate-100 shadow-[3px_3px_0px_#000]">
               <button
                 onClick={() => setRole('player')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                  role === 'player'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                className={`flex-1 py-2 text-xs font-black rounded-full transition-all ${
+                  role === 'player' ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000] border-2 border-black' : 'text-slate-700'
                 }`}
               >
-                🎮 Join Game
+                Join Game
               </button>
               <button
                 onClick={() => setRole('host')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                  role === 'host'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                className={`flex-1 py-2 text-xs font-black rounded-full transition-all ${
+                  role === 'host' ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000] border-2 border-black' : 'text-slate-700'
                 }`}
               >
-                👑 Host Game
+                Host Game
               </button>
             </div>
 
             {role === 'player' ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card max-w-sm mx-auto p-6"
-              >
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="neo-box p-6 sm:p-8 max-w-sm mx-auto bg-white">
                 <form onSubmit={handleJoinSession} className="space-y-4">
                   <div>
-                    <label className="label">Game PIN (6 Digits)</label>
+                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Game PIN (6 Digits)</label>
                     <input
                       type="text"
                       maxLength={6}
                       value={gameCode}
                       onChange={(e) => setGameCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="e.g. 842195"
-                      className="input text-center text-2xl font-black tracking-widest uppercase"
+                      className="w-full text-center text-3xl font-black tracking-widest uppercase py-3 border-2 border-black rounded-xl shadow-[3px_3px_0px_#000] focus:ring-2 focus:ring-[#EC4899]"
                       autoFocus
                     />
                   </div>
 
                   <div>
-                    <label className="label">Your Nickname</label>
+                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Your Nickname</label>
                     <input
                       type="text"
                       value={playerName}
                       onChange={(e) => setPlayerName(e.target.value)}
                       placeholder="e.g. Maverick"
-                      className="input text-center font-bold"
+                      className="w-full text-center font-bold py-2.5 border-2 border-black rounded-xl shadow-[2px_2px_0px_#000]"
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="btn-primary w-full py-3 text-base justify-center shadow-lg shadow-indigo-500/25"
-                  >
-                    Enter Arena <ArrowRight className="w-4 h-4" />
+                  <button type="submit" className="w-full neo-btn-pink py-3 text-base">
+                    Enter Arena ➔
                   </button>
                 </form>
               </motion.div>
             ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card max-w-md mx-auto p-6 space-y-4"
-              >
-                <h3 className="font-bold text-slate-900 dark:text-white text-base">Select Quiz to Host</h3>
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="neo-box p-6 sm:p-8 max-w-md mx-auto bg-white space-y-4">
+                <h3 className="font-black text-xl font-display text-slate-900">Select Quiz to Host</h3>
                 <div>
-                  <label className="label">Available Quizzes</label>
+                  <label className="block text-xs font-black uppercase text-slate-700 mb-1">Available Campus Quizzes</label>
                   <select
                     value={selectedQuiz}
                     onChange={(e) => setSelectedQuiz(e.target.value)}
-                    className="input text-sm"
+                    className="w-full p-3 rounded-xl border-2 border-black font-bold text-sm bg-white shadow-[2px_2px_0px_#000]"
                   >
                     {availableQuizzes.map(q => (
-                      <option key={q._id} value={q._id}>
+                      <option key={q.id || q._id} value={q.id || q._id}>
                         {q.title} ({q.questions?.length || 0} questions)
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <button
-                  onClick={handleCreateSession}
-                  className="btn-primary w-full py-3 justify-center bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 shadow-lg shadow-amber-500/25"
-                >
+                <button onClick={handleCreateSession} className="w-full neo-btn-pink py-3.5 text-base">
                   <Sparkles className="w-4 h-4" /> Create Room & Get PIN
                 </button>
               </motion.div>
@@ -291,41 +257,35 @@ export default function LiveQuizPage() {
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* SCREEN 2: LOBBY (WAITING FOR PLAYERS)                      */}
-        {/* ========================================================= */}
+        {/* ================= SCREEN 2: LOBBY ================= */}
         {gameState === 'lobby' && (
-          <div className="card text-center p-8 space-y-6">
-            <div className="inline-block px-6 py-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800">
-              <span className="text-xs font-bold text-indigo-500 tracking-widest uppercase">Join at QuizHub with PIN</span>
-              <p className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-widest mt-1">
+          <div className="neo-box p-8 text-center space-y-6 bg-white relative">
+            <SparkleStar className="absolute top-4 left-4 w-8 h-8 text-[#EC4899]" />
+            <div className="inline-block px-8 py-4 rounded-2xl bg-amber-300 border-3 border-black shadow-[4px_4px_0px_#000]">
+              <span className="text-xs font-black text-black tracking-widest uppercase">Join at QuizHub with PIN</span>
+              <p className="text-4xl sm:text-6xl font-black text-black tracking-widest mt-1 font-display">
                 {gameCode}
               </p>
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                <Users className="w-5 h-5 text-indigo-500" />
+              <h2 className="text-2xl font-black font-display text-slate-900 flex items-center justify-center gap-2">
+                <Users className="w-6 h-6 text-[#EC4899]" />
                 Players in Lobby ({participants.length})
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                {role === 'host' ? 'Press "Start Game" when all players are in!' : 'Waiting for host to begin the countdown...'}
-              </p>
             </div>
 
-            {/* Players Bubbles */}
-            <div className="flex flex-wrap items-center justify-center gap-3 min-h-[120px] max-w-lg mx-auto p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex flex-wrap items-center justify-center gap-3 min-h-[100px] max-w-lg mx-auto p-4 rounded-2xl border-2 border-black bg-slate-50 shadow-[3px_3px_0px_#000]">
               {participants.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No players have entered yet...</p>
+                <p className="text-xs font-bold text-slate-400 italic">Waiting for players to join...</p>
               ) : (
                 participants.map((p) => (
                   <motion.div
                     key={p.id}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-800 dark:text-white"
+                    className="px-4 py-2 rounded-full bg-white border-2 border-black font-extrabold text-xs shadow-[2px_2px_0px_#000]"
                   >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     {p.name}
                   </motion.div>
                 ))
@@ -333,81 +293,41 @@ export default function LiveQuizPage() {
             </div>
 
             {role === 'host' && (
-              <button
-                onClick={handleStartGame}
-                disabled={participants.length === 0}
-                className="btn-primary px-8 py-3.5 text-base mx-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 shadow-lg shadow-emerald-500/25 disabled:opacity-50"
-              >
+              <button onClick={handleStartGame} disabled={participants.length === 0} className="neo-btn-pink py-3.5 px-8 text-base">
                 <Play className="w-5 h-5" /> Start Game ({participants.length} Players)
               </button>
             )}
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* SCREEN 3: ACTIVE QUESTION IN GAME                         */}
-        {/* ========================================================= */}
+        {/* ================= SCREEN 3: ACTIVE QUESTION ================= */}
         {gameState === 'question' && currentQuestion && (
           <div className="space-y-6">
-            {/* Top status */}
             <div className="flex items-center justify-between">
-              <span className="badge badge-indigo text-xs">
+              <span className="neo-tag-pink text-xs">
                 Question {questionIndex + 1} of {totalQuestions}
               </span>
 
               {role === 'host' && (
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleNextQuestion}
-                    className="btn-primary text-xs py-1.5"
-                  >
-                    Next Question <ArrowRight className="w-3.5 h-3.5" />
+                  <button onClick={handleNextQuestion} className="neo-btn-pink text-xs py-2 px-4">
+                    Next Question ➔
                   </button>
-                  <button
-                    onClick={handleEndGame}
-                    className="btn-secondary text-xs py-1.5 text-red-500"
-                  >
-                    End
+                  <button onClick={handleEndGame} className="neo-btn-white text-xs py-2 px-4 text-red-600">
+                    End Game
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Question Card */}
-            <div className="card text-center p-8 shadow-xl">
-              {currentQuestion.imageUrl && (
-                <img
-                  src={currentQuestion.imageUrl}
-                  alt="Question"
-                  className="max-h-48 rounded-xl mx-auto object-cover mb-4"
-                />
-              )}
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-snug">
+            <div className="neo-box p-8 text-center bg-white">
+              <h2 className="text-2xl font-black font-display text-slate-900 leading-snug">
                 {currentQuestion.questionText}
               </h2>
             </div>
 
-            {/* Feedback notification if answered */}
-            <AnimatePresence>
-              {myAnswerResult && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className={`p-4 rounded-2xl text-center font-bold text-sm ${
-                    myAnswerResult.isCorrect
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                      : 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                  }`}
-                >
-                  {myAnswerResult.isCorrect
-                    ? `🎉 Correct! +${myAnswerResult.points} points!`
-                    : '❌ Incorrect! Better luck on next question!'}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* 4 Big Color Options (Kahoot style) */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            {/* 4 Big Color Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(currentQuestion.options || ['Option A', 'Option B', 'Option C', 'Option D']).map((opt, i) => {
                 const color = OPTION_COLORS[i % OPTION_COLORS.length];
                 return (
@@ -415,9 +335,7 @@ export default function LiveQuizPage() {
                     key={i}
                     onClick={() => handleSelectAnswer(opt)}
                     disabled={hasAnswered || role === 'host'}
-                    className={`p-6 rounded-2xl text-left border-b-4 font-bold text-base transition-all active:scale-95 shadow-md flex items-center justify-between ${color.bg} ${color.text} ${
-                      hasAnswered ? 'opacity-80 cursor-not-allowed' : ''
-                    }`}
+                    className={`p-6 rounded-2xl border-3 border-black font-extrabold text-base shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all flex items-center justify-between ${color.bg} ${hasAnswered ? 'opacity-70' : ''}`}
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-xl">{color.shape}</span>
@@ -427,68 +345,30 @@ export default function LiveQuizPage() {
                 );
               })}
             </div>
-
-            {/* Live Mini-Leaderboard */}
-            <div className="card p-4">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                Live Standings
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {[...participants].sort((a, b) => b.score - a.score).map((p, i) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs font-semibold"
-                  >
-                    <span className="text-indigo-500 font-bold">#{i + 1}</span>
-                    <span>{p.name}</span>
-                    <span className="badge badge-indigo text-[10px]">{p.score} pts</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* SCREEN 4: GAME ENDED & PODIUM                             */}
-        {/* ========================================================= */}
+        {/* ================= SCREEN 4: GAME ENDED ================= */}
         {gameState === 'ended' && (
-          <div className="card text-center p-8 space-y-6">
-            <Trophy className="w-16 h-16 text-amber-500 mx-auto animate-bounce" />
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white">Game Over!</h2>
-            <p className="text-xs text-slate-400">Here are the final champion standings!</p>
+          <div className="neo-box p-10 text-center space-y-6 bg-white relative">
+            <Trophy className="w-16 h-16 text-amber-400 mx-auto animate-bounce" />
+            <h2 className="text-4xl font-black font-display text-slate-900">Game Over!</h2>
 
-            <div className="max-w-md mx-auto divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="max-w-md mx-auto space-y-2">
               {finalScores.map((player, idx) => (
-                <div
-                  key={player.id || idx}
-                  className="py-3 flex items-center justify-between text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      idx === 0 ? 'bg-amber-400 text-slate-900' : idx === 1 ? 'bg-slate-300 text-slate-900' : idx === 2 ? 'bg-amber-700 text-white' : 'text-slate-400'
-                    }`}>
-                      {idx + 1}
-                    </span>
-                    <span className="font-bold text-slate-900 dark:text-white">{player.name}</span>
-                  </div>
-                  <span className="font-black text-indigo-600 dark:text-indigo-400">{player.score} pts</span>
+                <div key={player.id || idx} className="neo-box p-3 flex items-center justify-between text-sm font-black bg-white">
+                  <span className="text-[#EC4899]">#{idx + 1} {player.name}</span>
+                  <span>{player.score} pts</span>
                 </div>
               ))}
             </div>
 
-            <button
-              onClick={() => {
-                setGameState('select');
-                setGameCode('');
-                setParticipants([]);
-              }}
-              className="btn-primary mx-auto"
-            >
+            <button onClick={() => { setGameState('select'); setGameCode(''); setParticipants([]); }} className="neo-btn-pink py-3 px-8 text-sm">
               Play Another Game
             </button>
           </div>
         )}
+
       </div>
     </DashboardLayout>
   );

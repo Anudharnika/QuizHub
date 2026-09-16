@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  User, Mail, Shield, Award, BookOpen, Star, TrendingUp,
-  Edit3, Check, Sparkles, Camera
-} from 'lucide-react';
+import { User, Mail, Award, Edit3, Camera, Target, Sparkles, Zap, Trophy } from 'lucide-react';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { userAPI } from '../services/api';
+import { SparkleStar, RotatingBadgeDoodle } from '../components/common/Doodles';
 
 const ACHIEVEMENTS = [
-  { id: '1', title: 'First Quiz Completed', icon: '🎯', desc: 'Successfully took your very first quiz.', unlocked: true },
-  { id: '2', title: 'Master Mind', icon: '🧠', desc: 'Scored 100% on any quiz challenge.', unlocked: true },
-  { id: '3', title: 'Quiz Creator', icon: '✍️', desc: 'Created and published a custom quiz.', unlocked: true },
-  { id: '4', title: 'Speed Demon', icon: '⚡', desc: 'Completed a 10-question quiz in under 2 minutes.', unlocked: false },
-  { id: '5', title: 'Leaderboard Hero', icon: '🏆', desc: 'Reached top 3 on the global leaderboard.', unlocked: false },
+  { id: '1', title: 'First Quiz Completed', icon: Target, desc: 'Successfully took your very first quiz.', unlocked: true },
+  { id: '2', title: 'Master Mind', icon: Sparkles, desc: 'Scored 100% on any quiz challenge.', unlocked: true },
+  { id: '3', title: 'Quiz Creator', icon: Edit3, desc: 'Created and published a custom quiz.', unlocked: true },
+  { id: '4', title: 'Speed Demon', icon: Zap, desc: 'Completed a quiz in under 2 minutes.', unlocked: false },
+  { id: '5', title: 'Leaderboard Hero', icon: Trophy, desc: 'Reached top 3 on the global leaderboard.', unlocked: false },
 ];
 
 export default function ProfilePage() {
@@ -24,7 +22,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
-    bio: user?.bio || 'Quiz enthusiast and continuous learner.',
+    bio: user?.bio || 'Campus Quiz enthusiast and knowledge seeker.',
     avatar: user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`
   });
   const [saving, setSaving] = useState(false);
@@ -36,12 +34,11 @@ export default function ProfilePage() {
       await userAPI.updateProfile(form);
       updateUser(form);
       setIsEditing(false);
-      toast.success('Profile updated', 'Your profile details have been saved.');
-    } catch (err) {
-      // If userAPI is not mocked, still update locally
+      toast.success('Profile updated!', 'Your profile details have been saved.');
+    } catch {
       updateUser(form);
       setIsEditing(false);
-      toast.success('Profile saved', 'Profile updated successfully.');
+      toast.success('Profile saved!', 'Profile updated successfully.');
     } finally {
       setSaving(false);
     }
@@ -50,14 +47,17 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 pb-12">
-        {/* Profile Card Header */}
-        <div className="card relative overflow-hidden p-8 border border-slate-100 dark:border-slate-800">
+        
+        {/* Header Profile Card */}
+        <div className="neo-box p-6 sm:p-10 bg-white relative">
+          <SparkleStar className="absolute -top-4 -right-3 w-8 h-8 text-[#EC4899]" />
+          
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <div className="relative">
               <img
                 src={form.avatar}
                 alt={user?.name}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-indigo-500/20 shadow-xl"
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-3 border-black shadow-[4px_4px_0px_#000]"
               />
               {isEditing && (
                 <button
@@ -65,7 +65,7 @@ export default function ProfilePage() {
                     const seed = Math.random().toString(36).substring(7);
                     setForm(prev => ({ ...prev, avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}` }));
                   }}
-                  className="absolute -bottom-2 -right-2 p-2 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors"
+                  className="absolute -bottom-2 -right-2 p-2 bg-[#EC4899] text-white rounded-xl border-2 border-black shadow-[2px_2px_0px_#000]"
                   title="Randomize Avatar"
                 >
                   <Camera className="w-4 h-4" />
@@ -76,28 +76,28 @@ export default function ProfilePage() {
             <div className="flex-1 text-center sm:text-left">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+                  <h1 className="text-3xl font-black font-display text-slate-900">
                     {user?.name}
                   </h1>
-                  <p className="text-xs text-slate-400 mt-0.5 flex items-center justify-center sm:justify-start gap-1.5">
-                    <Mail className="w-3.5 h-3.5" /> {user?.email}
+                  <p className="text-xs font-bold text-slate-500 mt-1 flex items-center justify-center sm:justify-start gap-1">
+                    <Mail className="w-3.5 h-3.5 text-[#EC4899]" /> {user?.email}
                   </p>
                 </div>
 
-                <span className="badge badge-indigo self-center sm:self-auto capitalize">
-                  {user?.role || 'User'}
+                <span className="neo-tag-pink text-xs uppercase self-center sm:self-auto">
+                  {user?.role || 'Campus User'}
                 </span>
               </div>
 
-              <p className="text-sm text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
-                {user?.bio || 'QuizHub Enthusiast and Knowledge Seeker.'}
+              <p className="text-sm font-medium text-slate-600 mt-3 leading-relaxed">
+                {user?.bio || 'College student participating in campus quizzes.'}
               </p>
 
-              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-6 text-xs text-slate-500">
-                <span>Member since {new Date(user?.createdAt || Date.now()).toLocaleDateString()}</span>
+              <div className="mt-4 pt-4 border-t-2 border-black flex flex-wrap items-center gap-6 text-xs font-bold text-slate-600">
+                <span>Joined QuizHub Campus</span>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1"
+                  className="text-[#EC4899] font-black hover:underline flex items-center gap-1"
                 >
                   <Edit3 className="w-3.5 h-3.5" /> {isEditing ? 'Cancel Edit' : 'Edit Profile'}
                 </button>
@@ -105,108 +105,72 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Edit form inline */}
+          {/* Edit form */}
           {isEditing && (
-            <motion.form
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              onSubmit={handleSave}
-              className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4"
-            >
+            <form onSubmit={handleSave} className="mt-6 pt-6 border-t-2 border-black space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Full Name</label>
+                  <label className="block text-xs font-black uppercase text-slate-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="input text-sm"
+                    className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-sm"
                   />
                 </div>
                 <div>
-                  <label className="label">Bio</label>
+                  <label className="block text-xs font-black uppercase text-slate-700 mb-1">Bio</label>
                   <input
                     type="text"
                     value={form.bio}
                     onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                    className="input text-sm"
+                    className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-sm"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="btn-secondary text-xs"
-                >
+                <button type="button" onClick={() => setIsEditing(false)} className="neo-btn-white text-xs py-2 px-4">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="btn-primary text-xs"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
+                <button type="submit" disabled={saving} className="neo-btn-pink text-xs py-2 px-5">
+                  {saving ? 'Saving...' : 'Save Profile'}
                 </button>
               </div>
-            </motion.form>
+            </form>
           )}
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="card text-center p-5">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quizzes Taken</span>
-            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-              {user?.stats?.quizzesTaken ?? 12}
-            </p>
-          </div>
-
-          <div className="card text-center p-5">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Average Score</span>
-            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-              {user?.stats?.averageScore ?? 84}%
-            </p>
-          </div>
-
-          <div className="card text-center p-5">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quizzes Created</span>
-            <p className="text-2xl font-black text-violet-600 dark:text-violet-400 mt-1">
-              {user?.stats?.quizzesCreated ?? 3}
-            </p>
-          </div>
-        </div>
-
-        {/* Achievements Section */}
-        <div className="card space-y-4">
+        {/* Badges Section */}
+        <div className="neo-box p-6 sm:p-8 bg-white space-y-4">
           <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-500" />
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Achievements & Badges</h2>
+            <Award className="w-6 h-6 text-amber-400" />
+            <h2 className="text-xl font-black font-display text-slate-900">Achievements & Badges</h2>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3">
             {ACHIEVEMENTS.map((ach) => (
               <div
                 key={ach.id}
-                className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${
-                  ach.unlocked
-                    ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-                    : 'bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 opacity-60'
+                className={`p-4 rounded-xl border-2 border-black flex items-center gap-4 ${
+                  ach.unlocked ? 'bg-amber-100 shadow-[3px_3px_0px_#000]' : 'bg-slate-100 opacity-60'
                 }`}
               >
-                <div className="text-3xl flex-shrink-0">{ach.icon}</div>
-                <div className="flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+                  <ach.icon className="w-5 h-5 text-slate-900" />
+                </div>
+                <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm text-slate-900 dark:text-white">{ach.title}</p>
-                    {ach.unlocked && <span className="badge badge-emerald text-[10px]">Unlocked</span>}
+                    <p className="font-extrabold text-sm text-slate-900 font-display">{ach.title}</p>
+                    {ach.unlocked && <span className="neo-tag-pink text-[9px]">UNLOCKED</span>}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{ach.desc}</p>
+                  <p className="text-xs font-medium text-slate-600 mt-0.5">{ach.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
