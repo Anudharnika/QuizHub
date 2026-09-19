@@ -109,10 +109,10 @@ export default function AuthPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-full max-w-lg neo-box p-6 sm:p-10 relative bg-white"
+          className="w-full max-w-lg neo-box p-5 sm:p-10 relative bg-white"
         >
           {/* Decorative Sparkle */}
-          <SparkleStar className="absolute -top-5 -right-4 w-8 h-8 text-[#EC4899]" />
+          <SparkleStar className="absolute -top-4 right-0 sm:-right-4 w-6 h-6 sm:w-8 sm:h-8 text-[#EC4899]" />
 
           {/* Mode Switcher Tabs */}
           <div className="flex border-2 border-black rounded-full p-1 mb-8 bg-slate-100 shadow-[2px_2px_0px_#000]">
@@ -226,7 +226,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full neo-btn-pink py-3 text.base"
+              className="w-full neo-btn-pink py-3 text-base"
             >
               {loading ? 'Processing...' : mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
             </button>

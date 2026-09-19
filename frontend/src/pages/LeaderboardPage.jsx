@@ -71,7 +71,7 @@ export default function LeaderboardPage() {
 
         {/* Top 3 Podium */}
         {!loading && top3.length >= 1 && search === '' && (
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 items-end pt-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-6 items-end pt-4 sm:pt-8 max-w-2xl mx-auto">
             
             {/* Rank 2 - Silver */}
             {top3[1] && (
@@ -81,12 +81,12 @@ export default function LeaderboardPage() {
                 transition={{ delay: 0.1 }}
                 className="flex flex-col items-center text-center order-1"
               >
-                <div className="neo-box p-3 bg-white w-full flex flex-col items-center shadow-[4px_4px_0px_#000]">
-                  <span className="neo-tag-pink text-[10px] mb-1">2ND PLACE</span>
-                  <p className="font-extrabold text-sm text-slate-900 font-display truncate w-full">{top3[1].userName || top3[1].name}</p>
-                  <p className="text-xs font-black text-[#EC4899]">{top3[1].score || 0} pts</p>
+                <div className="neo-box p-2 sm:p-3 bg-white w-full flex flex-col items-center shadow-[2px_2px_0px_#000] sm:shadow-[4px_4px_0px_#000]">
+                  <span className="neo-tag-pink text-[9px] sm:text-[10px] mb-1 px-1.5 py-0.5">2ND</span>
+                  <p className="font-extrabold text-xs sm:text-sm text-slate-900 font-display truncate w-full">{top3[1].userName || top3[1].name}</p>
+                  <p className="text-[11px] sm:text-xs font-black text-[#EC4899]">{top3[1].score || 0} pts</p>
                 </div>
-                <div className="w-full h-24 bg-slate-200 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-slate-700 text-2xl shadow-[2px_2px_0px_#000]">
+                <div className="w-full h-16 sm:h-24 bg-slate-200 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-slate-700 text-lg sm:text-2xl shadow-[2px_2px_0px_#000]">
                   #2
                 </div>
               </motion.div>
@@ -100,13 +100,13 @@ export default function LeaderboardPage() {
                 transition={{ delay: 0.2 }}
                 className="flex flex-col items-center text-center order-2"
               >
-                <div className="neo-box p-4 bg-amber-300 w-full flex flex-col items-center shadow-[6px_6px_0px_#000]">
-                  <Crown className="w-6 h-6 text-black animate-bounce mb-1" />
-                  <span className="px-2 py-0.5 rounded-full border border-black bg-black text-white font-extrabold text-[10px] uppercase mb-1">CHAMPION</span>
-                  <p className="font-black text-base text-slate-900 font-display truncate w-full">{top3[0].userName || top3[0].name}</p>
-                  <p className="text-sm font-black text-black">{top3[0].score || 0} pts</p>
+                <div className="neo-box p-2.5 sm:p-4 bg-amber-300 w-full flex flex-col items-center shadow-[3px_3px_0px_#000] sm:shadow-[6px_6px_0px_#000]">
+                  <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-black animate-bounce mb-0.5 sm:mb-1" />
+                  <span className="px-1.5 py-0.5 rounded-full border border-black bg-black text-white font-extrabold text-[8px] sm:text-[10px] uppercase mb-1">CHAMPION</span>
+                  <p className="font-black text-xs sm:text-base text-slate-900 font-display truncate w-full">{top3[0].userName || top3[0].name}</p>
+                  <p className="text-xs sm:text-sm font-black text-black">{top3[0].score || 0} pts</p>
                 </div>
-                <div className="w-full h-32 bg-amber-400 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-black text-3xl shadow-[3px_3px_0px_#000]">
+                <div className="w-full h-24 sm:h-32 bg-amber-400 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-black text-2xl sm:text-3xl shadow-[3px_3px_0px_#000]">
                   #1
                 </div>
               </motion.div>
@@ -120,12 +120,12 @@ export default function LeaderboardPage() {
                 transition={{ delay: 0.3 }}
                 className="flex flex-col items-center text-center order-3"
               >
-                <div className="neo-box p-3 bg-white w-full flex flex-col items-center shadow-[4px_4px_0px_#000]">
-                  <span className="neo-tag-pink text-[10px] mb-1">3RD PLACE</span>
-                  <p className="font-extrabold text-sm text-slate-900 font-display truncate w-full">{top3[2].userName || top3[2].name}</p>
-                  <p className="text-xs font-black text-[#EC4899]">{top3[2].score || 0} pts</p>
+                <div className="neo-box p-2 sm:p-3 bg-white w-full flex flex-col items-center shadow-[2px_2px_0px_#000] sm:shadow-[4px_4px_0px_#000]">
+                  <span className="neo-tag-pink text-[9px] sm:text-[10px] mb-1 px-1.5 py-0.5">3RD</span>
+                  <p className="font-extrabold text-xs sm:text-sm text-slate-900 font-display truncate w-full">{top3[2].userName || top3[2].name}</p>
+                  <p className="text-[11px] sm:text-xs font-black text-[#EC4899]">{top3[2].score || 0} pts</p>
                 </div>
-                <div className="w-full h-20 bg-amber-100 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-amber-900 text-xl shadow-[2px_2px_0px_#000]">
+                <div className="w-full h-14 sm:h-20 bg-amber-100 border-2 border-black border-t-0 rounded-b-xl flex items-center justify-center font-black text-amber-900 text-base sm:text-xl shadow-[2px_2px_0px_#000]">
                   #3
                 </div>
               </motion.div>

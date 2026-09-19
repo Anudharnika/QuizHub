@@ -121,11 +121,11 @@ export default function DashboardPage() {
               Here's what's happening with your quizzes today.
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link to="/live" className="neo-btn-white text-xs py-2.5 px-4">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
+            <Link to="/live" className="neo-btn-white text-xs py-2 sm:py-2.5 px-3.5 sm:px-4 flex-1 sm:flex-none">
               <Zap className="w-4 h-4 text-[#EC4899]" /> Live Mode
             </Link>
-            <Link to="/create-quiz" className="neo-btn-pink text-xs py-2.5 px-5">
+            <Link to="/create-quiz" className="neo-btn-pink text-xs py-2 sm:py-2.5 px-4 sm:px-5 flex-1 sm:flex-none">
               <PlusCircle className="w-4 h-4" /> New Quiz
             </Link>
           </div>

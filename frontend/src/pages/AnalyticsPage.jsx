@@ -126,29 +126,29 @@ export default function AnalyticsPage() {
           <div className="space-y-6">
             
             {/* Overview Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="neo-box p-5 bg-white">
-                <span className="text-xs font-black uppercase text-slate-500 font-display">Quizzes Taken</span>
-                <p className="text-3xl font-black text-slate-900 font-display mt-1">{data?.totalQuizzesTaken || 0}</p>
-                <p className="text-xs font-bold text-[#EC4899] mt-1">Completed tests</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="neo-box p-3.5 sm:p-5 bg-white">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-slate-500 font-display">Quizzes Taken</span>
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 font-display mt-1">{data?.totalQuizzesTaken || 0}</p>
+                <p className="text-[11px] sm:text-xs font-bold text-[#EC4899] mt-0.5 sm:mt-1">Completed tests</p>
               </div>
 
-              <div className="neo-box p-5 bg-white">
-                <span className="text-xs font-black uppercase text-slate-500 font-display">Average Score</span>
-                <p className="text-3xl font-black text-emerald-600 font-display mt-1">{data?.averageScore || 0}%</p>
-                <p className="text-xs font-bold text-emerald-600 mt-1">Across all quizzes</p>
+              <div className="neo-box p-3.5 sm:p-5 bg-white">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-slate-500 font-display">Average Score</span>
+                <p className="text-2xl sm:text-3xl font-black text-emerald-600 font-display mt-1">{data?.averageScore || 0}%</p>
+                <p className="text-[11px] sm:text-xs font-bold text-emerald-600 mt-0.5 sm:mt-1">Across all quizzes</p>
               </div>
 
-              <div className="neo-box p-5 bg-white">
-                <span className="text-xs font-black uppercase text-slate-500 font-display">Highest Score</span>
-                <p className="text-3xl font-black text-purple-600 font-display mt-1">{data?.highestScore || 0}%</p>
-                <p className="text-xs font-bold text-purple-600 mt-1">Personal Best</p>
+              <div className="neo-box p-3.5 sm:p-5 bg-white">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-slate-500 font-display">Highest Score</span>
+                <p className="text-2xl sm:text-3xl font-black text-purple-600 font-display mt-1">{data?.highestScore || 0}%</p>
+                <p className="text-[11px] sm:text-xs font-bold text-purple-600 mt-0.5 sm:mt-1">Personal Best</p>
               </div>
 
-              <div className="neo-box p-5 bg-white">
-                <span className="text-xs font-black uppercase text-slate-500 font-display">Status</span>
-                <p className="text-3xl font-black text-amber-500 font-display mt-1">Active</p>
-                <p className="text-xs font-bold text-amber-600 mt-1">Campus Participant</p>
+              <div className="neo-box p-3.5 sm:p-5 bg-white">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-slate-500 font-display">Status</span>
+                <p className="text-2xl sm:text-3xl font-black text-amber-500 font-display mt-1">Active</p>
+                <p className="text-[11px] sm:text-xs font-bold text-amber-600 mt-0.5 sm:mt-1">Campus Participant</p>
               </div>
             </div>
 

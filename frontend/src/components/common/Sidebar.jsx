@@ -96,11 +96,11 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              initial={{ x: -300 }}
+              initial={{ x: -280 }}
               animate={{ x: 0 }}
-              exit={{ x: -300 }}
+              exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-[#FFFDF9] border-r-3 border-black z-50 shadow-2xl flex flex-col p-4"
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-[80vw] max-w-[280px] bg-[#FFFDF9] border-r-3 border-black z-50 shadow-2xl flex flex-col p-4"
             >
               <div className="flex items-center justify-between pb-4 border-b-2 border-black mb-4">
                 <div className="flex items-center gap-2">

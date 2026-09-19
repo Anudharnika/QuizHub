@@ -154,11 +154,11 @@ export default function LandingPage() {
           </p>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link to={user ? "/create-quiz" : "/auth"} className="neo-btn-pink text-lg px-8 py-3.5">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+            <Link to={user ? "/create-quiz" : "/auth"} className="neo-btn-pink text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto">
               Get Started <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link to="/explore" className="neo-btn-white text-lg px-7 py-3.5">
+            <Link to="/explore" className="neo-btn-white text-base sm:text-lg px-6 sm:px-7 py-3 sm:py-3.5 w-full sm:w-auto">
               Explore Quizzes <ChevronDown className="w-4 h-4" />
             </Link>
           </div>
@@ -175,7 +175,7 @@ export default function LandingPage() {
           <RotatingBadgeDoodle 
             text="Learn more about service • " 
             icon={Flame} 
-            className="absolute -top-6 -left-6 z-20" 
+            className="absolute -top-6 left-0 sm:-left-6 z-20 scale-75 sm:scale-100" 
           />
 
           <AnimatedHeroCharacter />
@@ -293,7 +293,7 @@ export default function LandingPage() {
         <RotatingBadgeDoodle 
           text="Learn more about service • " 
           icon={HelpCircle} 
-          className="absolute -top-6 -right-2 z-20" 
+          className="absolute -top-6 right-2 sm:-right-2 z-20 scale-75 sm:scale-100" 
         />
 
         <div className="neo-box p-6 sm:p-10 relative">
@@ -356,11 +356,11 @@ export default function LandingPage() {
 
       {/* LETS MAKE FIRST QUIZ CTA BANNER */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
-        <div className="relative bg-[#EC4899] border-[3px] border-black rounded-[2.5rem] p-8 sm:p-14 shadow-[8px_8px_0px_#000] text-center text-white overflow-hidden">
+        <div className="relative bg-[#EC4899] border-[3px] border-black rounded-[2.5rem] p-6 sm:p-14 shadow-[8px_8px_0px_#000] text-center text-white overflow-hidden">
           
           {/* Corner Sparkle Doodles */}
-          <SparkleStar className="absolute top-6 left-6 w-8 h-8 text-amber-300" />
-          <SparkleStar className="absolute bottom-6 right-6 w-8 h-8 text-amber-300" />
+          <SparkleStar className="absolute top-4 left-4 sm:top-6 sm:left-6 w-6 h-6 sm:w-8 sm:h-8 text-amber-300" />
+          <SparkleStar className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-6 h-6 sm:w-8 sm:h-8 text-amber-300" />
 
           <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white mb-3">
             Lets Make First Quiz
@@ -372,17 +372,17 @@ export default function LandingPage() {
 
           {/* AI Prompt Input Bar */}
           <form onSubmit={handleGenerate} className="max-w-xl mx-auto relative">
-            <div className="bg-white border-2 border-black rounded-full p-2 flex items-center shadow-[4px_4px_0px_#000]">
+            <div className="bg-white border-2 border-black rounded-2xl sm:rounded-full p-2 flex flex-col sm:flex-row items-center gap-2 shadow-[4px_4px_0px_#000]">
               <input
                 type="text"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="Give me something to generate quiz..."
-                className="flex-1 px-5 py-2.5 text-slate-900 font-medium text-sm focus:outline-none bg-transparent"
+                className="w-full flex-1 px-4 sm:px-5 py-2.5 text-slate-900 font-medium text-sm focus:outline-none bg-transparent"
               />
               <button
                 type="submit"
-                className="bg-[#EC4899] text-white font-extrabold text-sm px-6 py-2.5 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-[#DB2777] active:translate-y-0.5 transition-all"
+                className="w-full sm:w-auto bg-[#EC4899] text-white font-extrabold text-sm px-6 py-2.5 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-[#DB2777] active:translate-y-0.5 transition-all"
               >
                 Generate
               </button>

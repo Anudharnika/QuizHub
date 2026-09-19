@@ -213,7 +213,7 @@ export default function MyQuizzesPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white neo-box max-w-sm w-full p-6 text-center"
+                className="bg-white neo-box max-w-[calc(100vw-2rem)] sm:max-w-sm w-full p-4 sm:p-6 text-center"
               >
                 <div className="flex justify-between items-center mb-3 border-b-2 border-black pb-2">
                   <h3 className="font-black text-slate-900 text-base font-display">Share Quiz Link</h3>

@@ -106,8 +106,8 @@ export default function ExplorePage() {
         </div>
 
         {/* Search + filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <form onSubmit={handleSearch} className="flex-1 min-w-[240px] max-w-md relative">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <form onSubmit={handleSearch} className="flex-1 min-w-0 max-w-md relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               value={search}
@@ -120,7 +120,7 @@ export default function ExplorePage() {
           <select
             value={difficulty}
             onChange={e => setDifficulty(e.target.value)}
-            className="px-4 py-2.5 rounded-full border-2 border-black font-extrabold text-xs bg-white shadow-[2px_2px_0px_#000]"
+            className="px-4 py-2.5 rounded-full border-2 border-black font-extrabold text-xs bg-white shadow-[2px_2px_0px_#000] w-full sm:w-auto"
           >
             {DIFFICULTIES.map(d => <option key={d} value={d}>Difficulty: {d}</option>)}
           </select>

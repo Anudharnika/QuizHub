@@ -120,7 +120,7 @@ export default function ResultPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className={`card relative overflow-hidden text-center p-8 border-2 ${
+          className={`card relative overflow-hidden text-center p-5 sm:p-8 border-2 ${
             passed
               ? 'bg-gradient-to-b from-emerald-50/70 to-white dark:from-emerald-950/20 dark:to-slate-900 border-emerald-300 dark:border-emerald-800/60 shadow-emerald-500/10'
               : 'bg-gradient-to-b from-amber-50/70 to-white dark:from-amber-950/20 dark:to-slate-900 border-amber-300 dark:border-amber-800/60 shadow-amber-500/10'
@@ -128,51 +128,51 @@ export default function ResultPage() {
         >
           {/* Badge icon */}
           <div className="relative inline-block mb-3">
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto shadow-lg ${
+            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto shadow-lg ${
               passed ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-emerald-500/30' : 'bg-gradient-to-tr from-amber-500 to-orange-400 text-white shadow-amber-500/30'
             }`}>
-              {passed ? <Trophy className="w-10 h-10 animate-bounce" /> : <Award className="w-10 h-10" />}
+              {passed ? <Trophy className="w-8 h-8 sm:w-10 sm:h-10 animate-bounce" /> : <Award className="w-8 h-8 sm:w-10 sm:h-10" />}
             </div>
           </div>
 
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             {passed ? 'Outstanding Job!' : 'Good Effort! Keep Practicing'}
           </h1>
-          <p className="text-slate-600 dark:text-slate-300 mt-1 max-w-md mx-auto text-sm">
+          <p className="text-slate-600 dark:text-slate-300 mt-1 max-w-md mx-auto text-xs sm:text-sm">
             {passed
               ? `You scored ${attempt.percentage}% and passed "${attempt.quizTitle || quiz?.title || 'Quiz'}". Great mastery!`
               : `You scored ${attempt.percentage}%. The passing score is ${quiz?.passingScore || 70}%. Review mistakes and try again!`}
           </p>
 
           {/* Key Metric Gauges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Score</span>
-              <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Score</span>
+              <p className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
                 {attempt.score} <span className="text-xs font-medium text-slate-400">/ {attempt.totalPoints || 100}</span>
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Accuracy</span>
-              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+            <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Accuracy</span>
+              <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                 {attempt.accuracy ?? attempt.percentage}%
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Correct / Wrong</span>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+            <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Correct / Wrong</span>
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
                 <span className="text-emerald-600">{correctCount}</span>
                 <span className="text-slate-300 dark:text-slate-600 mx-1">/</span>
                 <span className="text-red-500">{wrongCount}</span>
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Time Taken</span>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-center justify-center gap-1">
-                <Clock className="w-5 h-5 text-indigo-500" />
+            <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Time Taken</span>
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-center justify-center gap-1">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                 {timeFormatted}
               </p>
             </div>

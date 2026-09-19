@@ -278,7 +278,7 @@ export default function QuestionBankPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white neo-box max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+                className="bg-white neo-box max-w-[calc(100vw-2rem)] sm:max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
               >
                 <div className="flex items-center justify-between mb-4 border-b-2 border-black pb-3">
                   <h2 className="text-xl font-black font-display text-slate-900">Add Question to Bank</h2>
@@ -299,7 +299,7 @@ export default function QuestionBankPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-black uppercase text-slate-700 mb-1">Question Type *</label>
                       <select

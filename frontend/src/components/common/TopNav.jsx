@@ -106,7 +106,7 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute right-0 top-12 w-80 neo-box p-0 overflow-hidden z-50 bg-white"
+                className="absolute -right-2 sm:right-0 top-12 w-[calc(100vw-2rem)] max-w-xs sm:w-80 neo-box p-0 overflow-hidden z-50 bg-white shadow-2xl"
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black bg-amber-100">
                   <h3 className="font-extrabold text-slate-900 text-sm font-display">Notifications</h3>
@@ -164,7 +164,7 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute right-0 top-12 w-52 neo-box p-0 overflow-hidden z-50 bg-white"
+                className="absolute right-0 top-12 w-[calc(100vw-2rem)] max-w-xs sm:w-52 neo-box p-0 overflow-hidden z-50 bg-white shadow-2xl"
               >
                 <div className="px-4 py-3 border-b-2 border-black bg-pink-100">
                   <p className="text-xs font-extrabold text-slate-900 truncate font-display">{user?.name}</p>

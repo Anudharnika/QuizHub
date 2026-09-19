@@ -225,7 +225,7 @@ export default function QuizTakePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-4 pb-28">
+      <div className="max-w-2xl mx-auto space-y-4 pb-36 lg:pb-8">
         
         {/* Sticky Mobile Header bar */}
         <div className="flex items-center justify-between gap-2 p-3 bg-white border-2 border-black rounded-2xl shadow-[3px_3px_0px_#000]">

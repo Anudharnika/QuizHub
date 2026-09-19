@@ -59,10 +59,10 @@ export default function SettingsPage() {
             <Sun className="w-5 h-5 text-amber-400" /> Appearance & Theme Mode
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => setTheme('light')}
-              className={`p-5 rounded-2xl border-2 border-black text-center transition-all flex flex-col items-center gap-2 ${
+              className={`p-4 sm:p-5 rounded-2xl border-2 border-black text-center transition-all flex flex-col items-center gap-2 ${
                 theme === 'light'
                   ? 'bg-[#EC4899] text-white shadow-[3px_3px_0px_#000]'
                   : 'bg-white text-black shadow-[2px_2px_0px_#000]'
@@ -75,7 +75,7 @@ export default function SettingsPage() {
 
             <button
               onClick={() => setTheme('dark')}
-              className={`p-5 rounded-2xl border-2 border-black text-center transition-all flex flex-col items-center gap-2 ${
+              className={`p-4 sm:p-5 rounded-2xl border-2 border-black text-center transition-all flex flex-col items-center gap-2 ${
                 theme === 'dark'
                   ? 'bg-[#EC4899] text-white shadow-[3px_3px_0px_#000]'
                   : 'bg-white text-black shadow-[2px_2px_0px_#000]'

@@ -165,7 +165,7 @@ export default function CreateQuizPage() {
         </div>
 
         {/* Step Content Container */}
-        <div className="neo-box p-6 sm:p-10 bg-white relative">
+        <div className="neo-box p-4 sm:p-10 bg-white relative">
           
           {/* STEP 0: INFO */}
           {step === 0 && (
@@ -191,7 +191,7 @@ export default function CreateQuizPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase text-slate-700 mb-1">Category</label>
                   <select

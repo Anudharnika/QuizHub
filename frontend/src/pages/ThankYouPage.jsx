@@ -40,9 +40,9 @@ export default function ThankYouPage() {
   return (
     <div className="min-h-screen bg-[#FFFDF9] bg-grid-pattern flex flex-col justify-between items-center p-6 text-slate-900 relative overflow-hidden">
       
-      <SparkleStar className="absolute top-10 left-10 w-10 h-10 text-[#EC4899]" />
-      <SparkleStar className="absolute bottom-10 right-10 w-10 h-10 text-amber-400" />
-      <RotatingBadgeDoodle text="Awesome Achievement • " icon={Trophy} className="absolute top-10 right-10" />
+      <SparkleStar className="absolute top-10 left-4 sm:left-10 w-6 h-6 sm:w-10 sm:h-10 text-[#EC4899]" />
+      <SparkleStar className="absolute bottom-10 right-4 sm:right-10 w-6 h-6 sm:w-10 sm:h-10 text-amber-400" />
+      <RotatingBadgeDoodle text="Awesome Achievement • " icon={Trophy} className="absolute top-10 right-4 sm:right-10 scale-75 sm:scale-100 hidden sm:block" />
 
       <header className="w-full max-w-7xl flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function ThankYouPage() {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}
-        className="neo-box p-8 sm:p-14 max-w-lg w-full text-center relative bg-white my-12"
+        className="neo-box p-6 sm:p-14 max-w-lg w-full text-center relative bg-white my-8 sm:my-12"
       >
         <div className="w-20 h-20 bg-amber-400 border-3 border-black rounded-full flex items-center justify-center text-4xl shadow-[4px_4px_0px_#000] mx-auto mb-6">
           <Trophy className="w-10 h-10 text-black" />

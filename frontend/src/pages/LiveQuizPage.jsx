@@ -509,7 +509,7 @@ export default function LiveQuizPage() {
             </div>
 
             {/* 4 Big Color Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {(currentQuestion.options || ['Option A', 'Option B', 'Option C', 'Option D']).map((opt, i) => {
                 const color = OPTION_COLORS[i % OPTION_COLORS.length];
                 const isSelected = selectedAnswer === opt;
@@ -519,7 +519,7 @@ export default function LiveQuizPage() {
                     type="button"
                     onClick={() => handleSelectAnswer(opt)}
                     disabled={hasAnswered}
-                    className={`p-6 rounded-2xl border-3 border-black font-extrabold text-base shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all flex items-center justify-between ${
+                    className={`p-4 sm:p-6 rounded-2xl border-2 sm:border-3 border-black font-extrabold text-sm sm:text-base shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all flex items-center justify-between ${
                       hasAnswered ? 'cursor-not-allowed' : 'cursor-pointer'
                     } ${color.bg} ${
                       isSelected ? 'ring-4 ring-black scale-[1.02] shadow-[6px_6px_0px_#000]' : ''
