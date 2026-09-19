@@ -89,7 +89,7 @@ export default function ThankYouPage() {
       </motion.div>
 
       <footer className="text-center text-xs font-bold text-slate-400">
-        QuizHub Thank You Page • College Assessment System
+        QuizDeck Thank You Page • College Assessment System
       </footer>
 
     </div>

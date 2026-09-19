@@ -299,7 +299,34 @@ export default function QuestionBankPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Question Type *</label>
+                      <select
+                        value={modalForm.type || 'MCQ'}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          let newOpts = modalForm.options;
+                          if (newType === 'TrueFalse') newOpts = ['True', 'False'];
+                          else if (newType === 'FillBlank') newOpts = [];
+                          else if (!newOpts || newOpts.length < 2) newOpts = ['', '', '', ''];
+                          setModalForm({
+                            ...modalForm,
+                            type: newType,
+                            options: newOpts,
+                            correctAnswer: newType === 'MultiSelect' ? [] : ''
+                          });
+                        }}
+                        className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-xs bg-amber-300 shadow-[1.5px_1.5px_0px_#000]"
+                      >
+                        <option value="MCQ">MCQ</option>
+                        <option value="MultiSelect">MultiSelect</option>
+                        <option value="TrueFalse">True / False</option>
+                        <option value="ShortAnswer">Short Answer</option>
+                        <option value="FillBlank">Fill Blank</option>
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-black uppercase text-slate-700 mb-1">Category</label>
                       <select
@@ -327,37 +354,84 @@ export default function QuestionBankPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase text-slate-700 mb-1">Options & Select Correct Answer</label>
-                    <div className="space-y-2">
-                      {modalForm.options.map((opt, i) => (
-                        <div key={i} className="flex items-center gap-2">
+                  {/* Dynamic Options Input according to Question Type */}
+                  {(modalForm.type === 'MCQ' || modalForm.type === 'MultiSelect' || !modalForm.type) && (
+                    <div>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Options & Select Correct Answer</label>
+                      <div className="space-y-2">
+                        {(modalForm.options || ['', '', '', '']).map((opt, i) => {
+                          const isCorrect = modalForm.type === 'MultiSelect'
+                            ? (Array.isArray(modalForm.correctAnswer) && modalForm.correctAnswer.includes(opt) && opt !== '')
+                            : (modalForm.correctAnswer === opt && opt !== '');
+                          return (
+                            <div key={i} className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (modalForm.type === 'MultiSelect') {
+                                    const curr = Array.isArray(modalForm.correctAnswer) ? modalForm.correctAnswer : [];
+                                    const next = curr.includes(opt) ? curr.filter(c => c !== opt) : [...curr, opt];
+                                    setModalForm({ ...modalForm, correctAnswer: next });
+                                  } else {
+                                    setModalForm({ ...modalForm, correctAnswer: opt });
+                                  }
+                                }}
+                                className={`w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center text-xs font-black transition-all ${
+                                  isCorrect ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]' : 'bg-slate-100 text-black'
+                                }`}
+                              >
+                                {isCorrect ? <Check className="w-4 h-4" /> : String.fromCharCode(65 + i)}
+                              </button>
+                              <input
+                                type="text"
+                                value={opt}
+                                onChange={(e) => {
+                                  const opts = [...(modalForm.options || ['', '', '', ''])];
+                                  opts[i] = e.target.value;
+                                  setModalForm({ ...modalForm, options: opts });
+                                }}
+                                placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                                className="flex-1 px-3 py-2 border-2 border-black rounded-xl font-bold text-xs"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {modalForm.type === 'TrueFalse' && (
+                    <div>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Select Correct Answer</label>
+                      <div className="flex gap-3">
+                        {['True', 'False'].map(tf => (
                           <button
+                            key={tf}
                             type="button"
-                            onClick={() => setModalForm({ ...modalForm, correctAnswer: opt })}
-                            className={`w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center text-xs font-black transition-all ${
-                              modalForm.correctAnswer === opt && opt !== ''
-                                ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]'
-                                : 'bg-slate-100 text-black'
+                            onClick={() => setModalForm({ ...modalForm, correctAnswer: tf, options: ['True', 'False'] })}
+                            className={`flex-1 py-2.5 rounded-xl border-2 border-black font-black text-xs transition-all ${
+                              modalForm.correctAnswer === tf ? 'bg-[#EC4899] text-white shadow-[2px_2px_0px_#000]' : 'bg-slate-100 text-slate-800'
                             }`}
                           >
-                            {modalForm.correctAnswer === opt && opt !== '' ? <Check className="w-4 h-4" /> : String.fromCharCode(65 + i)}
+                            {tf}
                           </button>
-                          <input
-                            type="text"
-                            value={opt}
-                            onChange={(e) => {
-                              const opts = [...modalForm.options];
-                              opts[i] = e.target.value;
-                              setModalForm({ ...modalForm, options: opts });
-                            }}
-                            placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                            className="flex-1 px-3 py-2 border-2 border-black rounded-xl font-bold text-xs"
-                          />
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {modalForm.type === 'FillBlank' && (
+                    <div>
+                      <label className="block text-xs font-black uppercase text-slate-700 mb-1">Correct Answer Word/Phrase</label>
+                      <input
+                        type="text"
+                        value={typeof modalForm.correctAnswer === 'string' ? modalForm.correctAnswer : ''}
+                        onChange={(e) => setModalForm({ ...modalForm, correctAnswer: e.target.value, options: [] })}
+                        placeholder="Type exact correct word or phrase..."
+                        className="w-full p-2.5 border-2 border-black rounded-xl font-bold text-xs bg-amber-50"
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-black uppercase text-slate-700 mb-1">Explanation (Optional)</label>

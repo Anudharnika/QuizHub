@@ -94,7 +94,7 @@ export default function ProfilePage() {
               </p>
 
               <div className="mt-4 pt-4 border-t-2 border-black flex flex-wrap items-center gap-6 text-xs font-bold text-slate-600">
-                <span>Joined QuizHub Campus</span>
+                <span>Joined QuizDeck Campus</span>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
                   className="text-[#EC4899] font-black hover:underline flex items-center gap-1"

@@ -1,26 +1,33 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, ChevronLeft, ChevronRight, Flag, CheckCircle, BookOpen, Users, Trophy, Play, Zap, ArrowLeft } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Flag, CheckCircle, BookOpen, Trophy, Play, Zap, Check } from 'lucide-react';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { quizAPI, attemptAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { SparkleStar } from '../components/common/Doodles';
 
 function Timer({ seconds, onExpire }) {
   const [remaining, setRemaining] = useState(seconds);
   const timerRef = useRef(null);
+  const onExpireRef = useRef(onExpire);
+
+  useEffect(() => {
+    onExpireRef.current = onExpire;
+  }, [onExpire]);
 
   useEffect(() => {
     setRemaining(seconds);
   }, [seconds]);
 
   useEffect(() => {
-    if (remaining <= 0) { onExpire(); return; }
     timerRef.current = setInterval(() => {
       setRemaining((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current); onExpire(); return 0; }
+        if (prev <= 1) { 
+          clearInterval(timerRef.current); 
+          if (onExpireRef.current) onExpireRef.current(); 
+          return 0; 
+        }
         return prev - 1;
       });
     }, 1000);
@@ -42,7 +49,6 @@ function Timer({ seconds, onExpire }) {
 export default function QuizTakePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const [quiz, setQuiz] = useState(null);
@@ -50,6 +56,8 @@ export default function QuizTakePage() {
   const [phase, setPhase] = useState('intro'); // intro | taking | submitting
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [submittedQuestions, setSubmittedQuestions] = useState({});
   const [flagged, setFlagged] = useState(new Set());
   const [startTime, setStartTime] = useState(null);
 
@@ -67,11 +75,9 @@ export default function QuizTakePage() {
     setStartTime(Date.now());
     setCurrentIdx(0);
     setAnswers({});
+    setSelectedAnswers({});
+    setSubmittedQuestions({});
     setFlagged(new Set());
-  };
-
-  const setAnswer = (qId, val) => {
-    setAnswers((prev) => ({ ...prev, [qId]: val }));
   };
 
   const toggleFlag = (qId) => {
@@ -169,14 +175,51 @@ export default function QuizTakePage() {
   const totalQ = questions.length;
   const answeredCount = Object.keys(answers).length;
 
+  const isSubmitted = Boolean(submittedQuestions[currentQ?.id]);
+
+  const getSelectedVal = (qId) => selectedAnswers[qId];
+
+  const hasSelected = (() => {
+    if (!currentQ) return false;
+    const val = getSelectedVal(currentQ.id);
+    if (val === undefined || val === null || val === '') return false;
+    if (Array.isArray(val)) return val.length > 0;
+    return true;
+  })();
+
   const handleOptionSelect = (val) => {
-    if (!currentQ) return;
+    if (!currentQ || isSubmitted) return;
+
     if (currentQ.type === 'MultiSelect') {
-      const prev = answers[currentQ.id] || [];
+      const prev = selectedAnswers[currentQ.id] || [];
       const next = prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val];
-      setAnswer(currentQ.id, next);
+      setSelectedAnswers((prevMap) => ({ ...prevMap, [currentQ.id]: next }));
     } else {
-      setAnswer(currentQ.id, val);
+      setSelectedAnswers((prevMap) => ({ ...prevMap, [currentQ.id]: val }));
+    }
+  };
+
+  const handleSubmitQuestionAnswer = () => {
+    if (!currentQ || !hasSelected || isSubmitted) return;
+
+    const currentVal = selectedAnswers[currentQ.id];
+    setAnswers((prev) => ({ ...prev, [currentQ.id]: currentVal }));
+    setSubmittedQuestions((prev) => ({ ...prev, [currentQ.id]: true }));
+
+    if (currentQ.correctAnswer) {
+      const isCorrect = currentQ.type === 'MultiSelect'
+        ? (Array.isArray(currentVal) && Array.isArray(currentQ.correctAnswer)
+            ? currentVal.slice().sort().join(',') === currentQ.correctAnswer.slice().sort().join(',')
+            : currentVal === currentQ.correctAnswer)
+        : String(currentVal).trim().toLowerCase() === String(currentQ.correctAnswer).trim().toLowerCase();
+
+      if (isCorrect) {
+        toast.success('Correct Answer!', 'Great job! Your answer has been evaluated & locked.');
+      } else {
+        toast.info('Answer Submitted', 'Your answer has been locked and recorded.');
+      }
+    } else {
+      toast.success('Answer Locked', 'Your answer has been submitted.');
     }
   };
 
@@ -191,7 +234,7 @@ export default function QuizTakePage() {
               Q<span className="text-[#EC4899]">{currentIdx + 1}</span>/{totalQ}
             </span>
             <span className="text-[10px] font-bold bg-slate-100 border border-black px-2 py-0.5 rounded-full">
-              {answeredCount} done
+              {answeredCount} submitted
             </span>
           </div>
 
@@ -208,8 +251,8 @@ export default function QuizTakePage() {
             className="neo-box p-5 sm:p-8 bg-white relative"
           >
             <div className="flex items-start justify-between gap-3 mb-4">
-              <span className="neo-tag-pink text-xs">
-                Question {currentIdx + 1}
+              <span className="neo-tag-pink text-xs uppercase font-extrabold">
+                Question {currentIdx + 1} • {currentQ?.type || 'MCQ'}
               </span>
 
               <button
@@ -230,19 +273,24 @@ export default function QuizTakePage() {
             <div className="space-y-3">
               {(currentQ?.type === 'MCQ' || currentQ?.type === 'MultiSelect' || !currentQ?.type) &&
                 (currentQ?.options || ['Option A', 'Option B', 'Option C', 'Option D']).map((opt, i) => {
+                  const selectedVal = selectedAnswers[currentQ?.id];
                   const isSelected = currentQ?.type === 'MultiSelect'
-                    ? (answers[currentQ?.id] || []).includes(opt)
-                    : answers[currentQ?.id] === opt;
+                    ? (selectedVal || []).includes(opt)
+                    : selectedVal === opt;
 
                   return (
                     <button
                       key={i}
+                      type="button"
                       onClick={() => handleOptionSelect(opt)}
-                      className={`w-full min-h-[54px] p-4 rounded-xl border-2 border-black font-bold text-sm text-left flex items-center justify-between transition-all active:scale-[0.98] ${
+                      disabled={isSubmitted}
+                      className={`w-full min-h-[54px] p-4 rounded-xl border-2 border-black font-bold text-sm text-left flex items-center justify-between transition-all ${
+                        isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'
+                      } ${
                         isSelected
                           ? 'bg-[#EC4899] text-white shadow-[4px_4px_0px_#000] translate-x-[-1px] translate-y-[-1px]'
                           : 'bg-white text-slate-900 shadow-[2px_2px_0px_#000] hover:bg-slate-50'
-                      }`}
+                      } ${isSubmitted && !isSelected ? 'opacity-50' : ''}`}
                     >
                       <span className="flex items-center gap-3">
                         <span className={`w-7 h-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-xs ${isSelected ? 'bg-white text-black' : 'bg-slate-100 text-black'}`}>
@@ -257,24 +305,63 @@ export default function QuizTakePage() {
 
               {currentQ?.type === 'TrueFalse' &&
                 ['True', 'False'].map((opt) => {
-                  const isSelected = answers[currentQ.id] === opt;
+                  const selectedVal = selectedAnswers[currentQ?.id];
+                  const isSelected = selectedVal === opt;
                   return (
                     <button
                       key={opt}
+                      type="button"
                       onClick={() => handleOptionSelect(opt)}
+                      disabled={isSubmitted}
                       className={`w-full min-h-[54px] p-4 rounded-xl border-2 border-black font-bold text-sm flex items-center justify-between transition-all ${
+                        isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'
+                      } ${
                         isSelected
                           ? 'bg-[#EC4899] text-white shadow-[4px_4px_0px_#000]'
-                          : 'bg-white text-slate-900 shadow-[2px_2px_0px_#000]'
-                      }`}
+                          : 'bg-white text-slate-900 shadow-[2px_2px_0px_#000] hover:bg-slate-50'
+                      } ${isSubmitted && !isSelected ? 'opacity-50' : ''}`}
                     >
                       <span className="flex items-center gap-3 font-extrabold text-base">
-                        <span>{opt === 'True' ? 'True' : 'False'}</span>
+                        <span>{opt}</span>
                       </span>
                       {isSelected && <CheckCircle className="w-5 h-5 text-white" />}
                     </button>
                   );
                 })}
+
+              {currentQ?.type === 'FillBlank' && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase text-slate-700">Type Your Answer</label>
+                  <input
+                    type="text"
+                    disabled={isSubmitted}
+                    value={selectedAnswers[currentQ?.id] || ''}
+                    onChange={(e) => handleOptionSelect(e.target.value)}
+                    placeholder="Enter your response here..."
+                    className={`w-full p-4 border-2 border-black rounded-xl font-bold text-base shadow-[2px_2px_0px_#000] focus:ring-2 focus:ring-[#EC4899] ${
+                      isSubmitted ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-amber-50 text-slate-900'
+                    }`}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Submit Answer Button */}
+            <div className="pt-5 mt-4 border-t-2 border-black/10 text-center">
+              {!isSubmitted ? (
+                <button
+                  type="button"
+                  onClick={handleSubmitQuestionAnswer}
+                  disabled={!hasSelected}
+                  className="w-full sm:w-auto min-w-[240px] neo-btn-pink py-3 px-6 text-sm font-black flex items-center justify-center gap-2 shadow-[3px_3px_0px_#000] disabled:opacity-40 disabled:cursor-not-allowed mx-auto"
+                >
+                  <Check className="w-4 h-4" /> Submit Answer
+                </button>
+              ) : (
+                <div className="p-3 px-6 rounded-2xl border-2 border-black bg-emerald-100 text-slate-900 font-extrabold text-sm inline-flex items-center gap-2 shadow-[3px_3px_0px_#000]">
+                  <CheckCircle className="w-5 h-5 text-emerald-600" /> Answer Locked & Submitted
+                </div>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -282,6 +369,7 @@ export default function QuizTakePage() {
         {/* Mobile Fixed Controls Bar */}
         <div className="fixed bottom-14 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t-2 border-black flex items-center justify-between gap-3 z-30 lg:relative lg:bottom-0 lg:bg-transparent lg:border-none lg:p-0">
           <button
+            type="button"
             onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
             disabled={currentIdx === 0}
             className="neo-btn-white text-xs py-2.5 px-4 disabled:opacity-40"
@@ -291,15 +379,25 @@ export default function QuizTakePage() {
 
           {currentIdx < totalQ - 1 ? (
             <button
-              onClick={() => setCurrentIdx((i) => Math.min(totalQ - 1, i + 1))}
-              className="neo-btn-pink text-xs py-2.5 px-6"
+              type="button"
+              onClick={() => {
+                if (!isSubmitted) {
+                  toast.error('Submit Answer Required', 'Please click "Submit Answer" to lock your choice before moving to the next question.');
+                  return;
+                }
+                setCurrentIdx((i) => Math.min(totalQ - 1, i + 1));
+              }}
+              disabled={!isSubmitted}
+              className="neo-btn-pink text-xs py-2.5 px-6 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Next <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
             <button
+              type="button"
               onClick={handleSubmit}
-              className="neo-btn-pink text-xs py-2.5 px-6 bg-emerald-500 hover:bg-emerald-600"
+              disabled={!isSubmitted}
+              className="neo-btn-pink text-xs py-2.5 px-6 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Zap className="w-4 h-4" /> Submit Quiz ({answeredCount}/{totalQ})
             </button>
@@ -310,3 +408,4 @@ export default function QuizTakePage() {
     </DashboardLayout>
   );
 }
+

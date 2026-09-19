@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Shield, Users, BookOpen, BarChart2, Trash2, CheckCircle, Search, AlertTriangle
+  Shield, Users, BookOpen, BarChart2, Trash2, Search
 } from 'lucide-react';
 import DashboardLayout from '../components/common/DashboardLayout';
 import { adminAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function AdminPage() {
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const [stats, setStats] = useState(null);
@@ -18,7 +16,7 @@ export default function AdminPage() {
   const [userSearch, setUserSearch] = useState('');
   const [activeTab, setActiveTab] = useState('overview'); // overview, users, quizzes
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     setLoading(true);
     try {
       const [statsRes, usersRes] = await Promise.all([
@@ -33,11 +31,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchAdminData();
-  }, []);
+  }, [fetchAdminData]);
 
   const handleDeleteQuiz = async (quizId, title) => {
     if (!window.confirm(`Admin Action: Delete "${title}"?`)) return;

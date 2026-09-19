@@ -4,7 +4,7 @@ const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('quizhub_theme') || 'light';
+    return localStorage.getItem('quizdeck_theme') || localStorage.getItem('quizhub_theme') || 'light';
   });
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function ThemeProvider({ children }) {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('quizhub_theme', theme);
+    localStorage.setItem('quizdeck_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

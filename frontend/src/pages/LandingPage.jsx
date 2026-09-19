@@ -48,25 +48,25 @@ export default function LandingPage() {
       id: 1,
       category: 'General',
       question: 'How does it work?',
-      answer: 'QuizHub lets you generate interactive quizzes from any topic, text, or document using advanced AI. You can also craft custom multiple-choice or true/false questions manually and host live sessions with your classmates.'
+      answer: 'QuizDeck lets you generate interactive quizzes from any topic, text, or document using advanced AI. You can also craft custom multiple-choice or true/false questions manually and host live sessions with your classmates.'
     },
     {
       id: 2,
       category: 'General',
       question: 'Whats our business plan?',
-      answer: 'QuizHub is 100% free for students and educators! We offer optional VIP campus features, custom domain hosting, and unlimited live room participants for college events.'
+      answer: 'QuizDeck is 100% free for students and educators! We offer optional VIP campus features, custom domain hosting, and unlimited live room participants for college events.'
     },
     {
       id: 3,
       category: 'General',
       question: 'Which platforms are we supporting?',
-      answer: 'QuizHub works seamlessly across all web browsers, desktop monitors, tablets, and mobile devices with zero app installation required.'
+      answer: 'QuizDeck works seamlessly across all web browsers, desktop monitors, tablets, and mobile devices with zero app installation required.'
     },
     {
       id: 4,
       category: 'Quizzes',
       question: 'Can I import PDF documents or notes?',
-      answer: 'Yes! Simply upload your PDF, Word document, or text notes into the AI quiz creator, and QuizHub will automatically extract key questions with answer keys.'
+      answer: 'Yes! Simply upload your PDF, Word document, or text notes into the AI quiz creator, and QuizDeck will automatically extract key questions with answer keys.'
     }
   ];
 
@@ -80,10 +80,10 @@ export default function LandingPage() {
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           className="whitespace-nowrap text-xs font-bold uppercase tracking-widest flex gap-8 items-center"
         >
-          <span>QuizHub • The Ultimate AI Quiz Platform for College</span>
+          <span>QuizDeck • The Ultimate AI Quiz Platform for College</span>
           <span>✦ Instant Document to Quiz Conversion</span>
           <span>Real-time Leaderboards & Live Multiplayer</span>
-          <span>QuizHub • The Ultimate AI Quiz Platform for College</span>
+          <span>QuizDeck • The Ultimate AI Quiz Platform for College</span>
           <span>✦ Instant Document to Quiz Conversion</span>
         </motion.div>
       </div>
@@ -93,10 +93,10 @@ export default function LandingPage() {
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] group-hover:rotate-6 transition-transform">
-            C
+            Q
           </div>
           <span className="font-extrabold text-2xl tracking-tight font-display">
-            Quiz<span className="text-[#EC4899]">Hub</span>
+            Quiz<span className="text-[#EC4899]">Deck</span>
           </span>
         </Link>
 
@@ -150,7 +150,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-slate-600 font-medium text-lg sm:text-xl max-w-2xl leading-relaxed">
-            With QuizHub all teachers and students can generate big and small Quizzes in seconds and host them live across college domains!
+            With QuizDeck all teachers and students can generate big and small Quizzes in seconds and host them live across college domains!
           </p>
 
           {/* Action CTAs */}
@@ -400,9 +400,9 @@ export default function LandingPage() {
           <div className="md:col-span-4 space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-lg">
-                C
+                Q
               </div>
-              <span className="font-extrabold text-xl font-display">CreateMyTest / QuizHub</span>
+              <span className="font-extrabold text-xl font-display">CreateMyTest / QuizDeck</span>
             </div>
             <p className="text-xs font-bold text-slate-500">Make quizzes with us across college campus</p>
           </div>
@@ -445,7 +445,7 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-200 text-center text-xs font-bold text-slate-400">
-          Copyright © 2026 QuizHub. All rights reserved.
+          Copyright © 2026 QuizDeck. All rights reserved.
         </div>
       </footer>
 

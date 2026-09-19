@@ -53,7 +53,7 @@ export default function NotFoundPage() {
       </motion.div>
 
       <footer className="text-center text-xs font-bold text-slate-400">
-        QuizHub 404 Page • College Quiz Platform
+        QuizDeck 404 Page • College Quiz Platform
       </footer>
 
     </div>

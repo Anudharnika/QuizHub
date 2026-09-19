@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ArrowLeft, CheckCircle2, Lock, Mail, User, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Lock, Mail, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { SparkleStar, RotatingBadgeDoodle } from '../components/common/Doodles';
+import { SparkleStar } from '../components/common/Doodles';
 
 export default function AuthPage() {
   const [searchParams] = useSearchParams();
@@ -42,10 +42,10 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await login(form.email, form.password);
-        toast.success('Welcome back!', 'Successfully signed in to QuizHub.');
+        toast.success('Welcome back!', 'Successfully signed in to QuizDeck.');
       } else {
         await signup(form.name, form.email, form.password);
-        toast.success('Account created!', 'Welcome to QuizHub! Let\'s build your first quiz.');
+        toast.success('Account created!', 'Welcome to QuizDeck! Let\'s build your first quiz.');
       }
       navigate('/dashboard');
     } catch (err) {
@@ -134,7 +134,7 @@ export default function AuthPage() {
 
           <div className="mb-6 text-center">
             <h1 className="text-3xl font-black font-display tracking-tight text-slate-900">
-              {mode === 'login' ? 'Welcome Back' : 'Join College QuizHub'}
+              {mode === 'login' ? 'Welcome Back' : 'Join College QuizDeck'}
             </h1>
             <p className="text-slate-500 font-medium text-sm mt-1">
               {mode === 'login' ? 'Sign in to access your quizzes and leaderboards' : 'Create your free account to build & host live tests'}
@@ -299,7 +299,7 @@ export default function AuthPage() {
       </AnimatePresence>
 
       <footer className="p-6 text-center text-xs font-bold text-slate-400">
-        QuizHub © 2026 • Campus Ready
+        QuizDeck © 2026 • Campus Ready
       </footer>
     </div>
   );

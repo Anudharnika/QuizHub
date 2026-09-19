@@ -247,7 +247,7 @@ export default function ResultPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-xs font-bold text-slate-400 dark:text-slate-500">Question {idx + 1}</span>
-                            <span className="badge badge-slate">{q.type}</span>
+                            <span className="badge badge-slate">{q.type || 'MCQ'}</span>
                             <span className={`text-xs font-semibold ${q.isCorrect ? 'text-emerald-600' : 'text-red-500'}`}>
                               {q.pointsEarned ?? 0} / {q.points || 10} pts
                             </span>

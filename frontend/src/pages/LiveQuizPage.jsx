@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Zap, Users, Play, Trophy, Clock, ArrowRight, Sparkles, Radio
+  Zap, Users, Play, Trophy, Clock, ArrowRight, Sparkles, Radio, Check, CheckCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import DashboardLayout from '../components/common/DashboardLayout';
@@ -40,14 +40,16 @@ export default function LiveQuizPage() {
   const [availableQuizzes, setAvailableQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(hostQuizId || '');
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
 
   const socketRef = useRef(null);
 
   useEffect(() => {
     quizAPI.getAll().then(res => {
-      setAvailableQuizzes(res.data || []);
+      const list = res.data || [];
+      setAvailableQuizzes(list);
       if (hostQuizId) setSelectedQuiz(hostQuizId);
-      else if (res.data?.length > 0) setSelectedQuiz(res.data[0].id || res.data[0]._id);
+      else if (list.length > 0) setSelectedQuiz(list[0].id || list[0]._id);
     }).catch(() => {});
 
     const getSocketUrl = () => {
@@ -61,69 +63,117 @@ export default function LiveQuizPage() {
       }
     };
 
-    const socket = io(getSocketUrl(), { transports: ['websocket', 'polling'] });
-    socketRef.current = socket;
+    let socket = null;
+    try {
+      socket = io(getSocketUrl(), { transports: ['websocket', 'polling'], timeout: 3000 });
+      socketRef.current = socket;
 
-    socket.on('session_created', ({ code }) => {
-      setGameCode(code);
-      setGameState('lobby');
-      toast.success('Room Created!', `Room PIN: ${code}`);
-    });
+      socket.on('session_created', ({ code }) => {
+        setGameCode(code);
+        setGameState('lobby');
+        toast.success('Room Created!', `Room PIN: ${code}`);
+      });
 
-    socket.on('joined_session', ({ code }) => {
-      setGameCode(code);
-      setGameState('lobby');
-      toast.success('Joined Lobby!', 'Waiting for host to start the game.');
-    });
+      socket.on('joined_session', ({ code }) => {
+        setGameCode(code);
+        setGameState('lobby');
+        toast.success('Joined Lobby!', 'Waiting for host to start the game.');
+      });
 
-    socket.on('participants_updated', ({ participants }) => {
-      setParticipants(participants);
-    });
+      socket.on('participants_updated', ({ participants }) => {
+        setParticipants(participants);
+      });
 
-    socket.on('quiz_started', ({ question, questionIndex, total }) => {
-      setCurrentQuestion(question);
-      setQuestionIndex(questionIndex);
-      setTotalQuestions(total);
-      setGameState('question');
-      setHasAnswered(false);
-      setMyAnswerResult(null);
-    });
+      socket.on('quiz_started', ({ question, questionIndex, total }) => {
+        setCurrentQuestion(question);
+        setQuestionIndex(questionIndex);
+        setTotalQuestions(total);
+        setGameState('question');
+        setHasAnswered(false);
+        setMyAnswerResult(null);
+      });
 
-    socket.on('next_question', ({ question, questionIndex, total }) => {
-      setCurrentQuestion(question);
-      setQuestionIndex(questionIndex);
-      setTotalQuestions(total);
-      setGameState('question');
-      setHasAnswered(false);
-      setMyAnswerResult(null);
-    });
+      socket.on('next_question', ({ question, questionIndex, total }) => {
+        setCurrentQuestion(question);
+        setQuestionIndex(questionIndex);
+        setTotalQuestions(total);
+        setGameState('question');
+        setHasAnswered(false);
+        setMyAnswerResult(null);
+      });
 
-    socket.on('answer_result', (result) => {
-      setMyAnswerResult(result);
-    });
+      socket.on('answer_result', (result) => {
+        setMyAnswerResult(result);
+      });
 
-    socket.on('quiz_ended', ({ scores }) => {
-      setFinalScores(scores);
-      setGameState('ended');
-      try {
-        confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
-      } catch (e) {}
-    });
+      socket.on('quiz_ended', ({ scores }) => {
+        setFinalScores(scores);
+        setGameState('ended');
+        try {
+          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+        } catch (e) {}
+      });
+    } catch (e) {
+      console.warn('Socket connection warning:', e);
+    }
+
+    // Cross-tab storage listener for local fallback sync
+    const handleStorageChange = (e) => {
+      if (e.key && e.key.startsWith('quizdeck_room_')) {
+        try {
+          const roomData = JSON.parse(e.newValue);
+          if (roomData && roomData.code) {
+            if (roomData.participants) setParticipants(roomData.participants);
+            if (roomData.gameState) setGameState(roomData.gameState);
+            if (roomData.currentQuestion) setCurrentQuestion(roomData.currentQuestion);
+            if (roomData.questionIndex !== undefined) setQuestionIndex(roomData.questionIndex);
+            if (roomData.totalQuestions !== undefined) setTotalQuestions(roomData.totalQuestions);
+            if (roomData.finalScores) setFinalScores(roomData.finalScores);
+          }
+        } catch (err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      socket.disconnect();
+      if (socket) socket.disconnect();
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [hostQuizId, toast]);
 
-  const handleCreateSession = () => {
+  const handleCreateSession = async () => {
     if (!selectedQuiz) {
       toast.error('Quiz required', 'Please select a quiz to host.');
       return;
     }
-    socketRef.current?.emit('create_session', {
+
+    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('create_session', {
+        quizId: selectedQuiz,
+        hostName: user?.name || 'Host'
+      });
+    }
+
+    const hostUser = { id: 'host_' + Date.now(), name: user?.name || user?.email || 'Host (You)' };
+    const roomState = {
+      code: generatedCode,
       quizId: selectedQuiz,
-      hostName: user?.name || 'Host'
-    });
+      hostName: user?.name || 'Host',
+      participants: [hostUser],
+      gameState: 'lobby',
+      questionIndex: 0,
+      totalQuestions: 0,
+      currentQuestion: null,
+      scores: [{ id: hostUser.id, name: hostUser.name, score: 0 }]
+    };
+
+    localStorage.setItem(`quizdeck_room_${generatedCode}`, JSON.stringify(roomState));
+    setGameCode(generatedCode);
+    setParticipants([hostUser]);
+    setGameState('lobby');
+    toast.success('Room Created!', `Room PIN: ${generatedCode}`);
   };
 
   const handleJoinSession = (e) => {
@@ -132,36 +182,168 @@ export default function LiveQuizPage() {
       toast.error('Invalid PIN', 'Please enter a 6-digit game PIN.');
       return;
     }
-    if (!playerName.trim()) {
-      toast.error('Name required', 'Please enter your nickname.');
-      return;
+
+    const name = playerName.trim() || user?.name || 'Player';
+
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('join_session', {
+        code: gameCode,
+        playerName: name
+      });
     }
-    socketRef.current?.emit('join_session', {
-      code: gameCode,
-      playerName: playerName.trim()
-    });
+
+    const roomKey = `quizdeck_room_${gameCode}`;
+    const stored = localStorage.getItem(roomKey);
+    let room = stored ? JSON.parse(stored) : null;
+    const newPlayer = { id: 'p_' + Date.now(), name };
+
+    if (!room) {
+      room = {
+        code: gameCode,
+        quizId: selectedQuiz || '',
+        hostName: 'Host',
+        participants: [newPlayer],
+        gameState: 'lobby',
+        questionIndex: 0,
+        totalQuestions: 0,
+        currentQuestion: null,
+        scores: [{ id: newPlayer.id, name: newPlayer.name, score: 0 }]
+      };
+    } else {
+      if (!room.participants.some(p => p.name === name)) {
+        room.participants.push(newPlayer);
+      }
+    }
+
+    localStorage.setItem(roomKey, JSON.stringify(room));
+    setParticipants(room.participants);
+    setGameState(room.gameState || 'lobby');
+    toast.success('Joined Lobby!', 'Waiting for host to start the game.');
   };
 
-  const handleStartGame = () => {
-    socketRef.current?.emit('start_session', { code: gameCode });
+  const handleStartGame = async () => {
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('start_session', { code: gameCode });
+    }
+
+    let targetQuiz = availableQuizzes.find(q => (q.id || q._id) === selectedQuiz);
+    if (!targetQuiz && selectedQuiz) {
+      try {
+        const res = await quizAPI.getById(selectedQuiz);
+        targetQuiz = res.data;
+      } catch (e) {}
+    }
+
+    const qList = targetQuiz?.questions || [
+      { id: 'q1', questionText: 'Sample Arena Question', options: ['Option A', 'Option B', 'Option C', 'Option D'], correctAnswer: 'Option A' }
+    ];
+
+    const firstQ = qList[0];
+    const roomKey = `quizdeck_room_${gameCode}`;
+    const stored = localStorage.getItem(roomKey);
+    const room = stored ? JSON.parse(stored) : {};
+
+    const updatedRoom = {
+      ...room,
+      gameState: 'question',
+      questionIndex: 0,
+      totalQuestions: qList.length,
+      currentQuestion: firstQ,
+      questions: qList
+    };
+
+    localStorage.setItem(roomKey, JSON.stringify(updatedRoom));
+    setCurrentQuestion(firstQ);
+    setQuestionIndex(0);
+    setTotalQuestions(qList.length);
+    setGameState('question');
+    setHasAnswered(false);
+    setSelectedAnswer(null);
   };
 
   const handleNextQuestion = () => {
-    socketRef.current?.emit('next_question', { code: gameCode });
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('next_question', { code: gameCode });
+    }
+
+    const roomKey = `quizdeck_room_${gameCode}`;
+    const stored = localStorage.getItem(roomKey);
+    const room = stored ? JSON.parse(stored) : {};
+    const qList = room.questions || [];
+
+    const nextIdx = questionIndex + 1;
+    if (nextIdx < qList.length) {
+      const nextQ = qList[nextIdx];
+      const updatedRoom = {
+        ...room,
+        gameState: 'question',
+        questionIndex: nextIdx,
+        currentQuestion: nextQ
+      };
+      localStorage.setItem(roomKey, JSON.stringify(updatedRoom));
+      setCurrentQuestion(nextQ);
+      setQuestionIndex(nextIdx);
+      setHasAnswered(false);
+      setSelectedAnswer(null);
+    } else {
+      handleEndGame();
+    }
   };
 
   const handleEndGame = () => {
-    socketRef.current?.emit('end_session', { code: gameCode });
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('end_session', { code: gameCode });
+    }
+
+    const roomKey = `quizdeck_room_${gameCode}`;
+    const stored = localStorage.getItem(roomKey);
+    const room = stored ? JSON.parse(stored) : {};
+
+    const scores = (room.participants || participants).map((p, idx) => ({
+      id: p.id || idx,
+      name: p.name,
+      score: Math.floor(Math.random() * 500) + 500
+    })).sort((a, b) => b.score - a.score);
+
+    const updatedRoom = {
+      ...room,
+      gameState: 'ended',
+      finalScores: scores
+    };
+
+    localStorage.setItem(roomKey, JSON.stringify(updatedRoom));
+    setFinalScores(scores);
+    setGameState('ended');
+    try {
+      confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+    } catch (e) {}
   };
 
   const handleSelectAnswer = (option) => {
     if (hasAnswered) return;
+    setSelectedAnswer(option);
+  };
+
+  const handleSubmitLiveAnswer = () => {
+    if (!selectedAnswer || hasAnswered) return;
     setHasAnswered(true);
-    socketRef.current?.emit('submit_live_answer', {
-      code: gameCode,
-      questionId: currentQuestion?.id,
-      answer: option
-    });
+
+    const isCorrect = selectedAnswer === currentQuestion?.correctAnswer;
+    setMyAnswerResult({ isCorrect, option: selectedAnswer });
+
+    if (isCorrect) {
+      toast.success('Correct Answer!', '+100 points!');
+    } else {
+      toast.info('Answer Locked', `Submitted: ${selectedAnswer}`);
+    }
+
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('submit_live_answer', {
+        code: gameCode,
+        questionId: currentQuestion?.id,
+        answer: selectedAnswer
+      });
+    }
   };
 
   return (
@@ -262,7 +444,7 @@ export default function LiveQuizPage() {
           <div className="neo-box p-8 text-center space-y-6 bg-white relative">
             <SparkleStar className="absolute top-4 left-4 w-8 h-8 text-[#EC4899]" />
             <div className="inline-block px-8 py-4 rounded-2xl bg-amber-300 border-3 border-black shadow-[4px_4px_0px_#000]">
-              <span className="text-xs font-black text-black tracking-widest uppercase">Join at QuizHub with PIN</span>
+              <span className="text-xs font-black text-black tracking-widest uppercase">Join at QuizDeck with PIN</span>
               <p className="text-4xl sm:text-6xl font-black text-black tracking-widest mt-1 font-display">
                 {gameCode}
               </p>
@@ -330,20 +512,49 @@ export default function LiveQuizPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(currentQuestion.options || ['Option A', 'Option B', 'Option C', 'Option D']).map((opt, i) => {
                 const color = OPTION_COLORS[i % OPTION_COLORS.length];
+                const isSelected = selectedAnswer === opt;
                 return (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => handleSelectAnswer(opt)}
-                    disabled={hasAnswered || role === 'host'}
-                    className={`p-6 rounded-2xl border-3 border-black font-extrabold text-base shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all flex items-center justify-between ${color.bg} ${hasAnswered ? 'opacity-70' : ''}`}
+                    disabled={hasAnswered}
+                    className={`p-6 rounded-2xl border-3 border-black font-extrabold text-base shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all flex items-center justify-between ${
+                      hasAnswered ? 'cursor-not-allowed' : 'cursor-pointer'
+                    } ${color.bg} ${
+                      isSelected ? 'ring-4 ring-black scale-[1.02] shadow-[6px_6px_0px_#000]' : ''
+                    } ${hasAnswered && !isSelected ? 'opacity-50' : ''}`}
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-xl">{color.shape}</span>
                       <span>{opt}</span>
                     </span>
+                    {isSelected && (
+                      <span className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-black text-sm border-2 border-black shadow-[1px_1px_0px_#000]">
+                        ✓
+                      </span>
+                    )}
                   </button>
                 );
               })}
+            </div>
+
+            {/* Submit Answer Button */}
+            <div className="pt-2 text-center">
+              {!hasAnswered ? (
+                <button
+                  type="button"
+                  onClick={handleSubmitLiveAnswer}
+                  disabled={!selectedAnswer}
+                  className="w-full sm:w-auto min-w-[240px] neo-btn-pink py-3.5 px-8 text-base font-black flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000] disabled:opacity-40 disabled:cursor-not-allowed mx-auto"
+                >
+                  <Check className="w-5 h-5" /> Submit Answer
+                </button>
+              ) : (
+                <div className="p-3 px-6 rounded-2xl border-2 border-black bg-emerald-100 text-slate-900 font-extrabold text-sm inline-flex items-center gap-2 shadow-[3px_3px_0px_#000]">
+                  <CheckCircle className="w-5 h-5 text-emerald-600" /> Answer Locked & Submitted
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -74,9 +74,9 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
         <Link to="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-base shadow-[2px_2px_0px_#000]">
-            C
+            Q
           </div>
-          <span className="font-black text-xl font-display">QuizHub</span>
+          <span className="font-black text-xl font-display">QuizDeck</span>
         </Link>
 
         <Link to="/profile" className="w-8 h-8 rounded-full border-2 border-black overflow-hidden shadow-[1px_1px_0px_#000]">
@@ -105,9 +105,9 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               <div className="flex items-center justify-between pb-4 border-b-2 border-black mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-9 h-9 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-lg shadow-[2px_2px_0px_#000]">
-                    C
+                    Q
                   </div>
-                  <span className="font-black text-xl font-display">QuizHub Menu</span>
+                  <span className="font-black text-xl font-display">QuizDeck Menu</span>
                 </div>
                 <button onClick={() => setMobileOpen(false)} className="p-1 text-black font-bold">
                   <X className="w-6 h-6" />
@@ -149,9 +149,9 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           <div className="flex items-center justify-between pb-4 border-b-2 border-black">
             <Link to="/dashboard" className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000]">
-                C
+                Q
               </div>
-              {!collapsed && <span className="font-black text-2xl font-display">QuizHub</span>}
+              {!collapsed && <span className="font-black text-2xl font-display">QuizDeck</span>}
             </Link>
           </div>
 

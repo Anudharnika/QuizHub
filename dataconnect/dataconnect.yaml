@@ -1,5 +1,5 @@
 specVersion: "v1"
-serviceId: "quizhub"
+serviceId: "quizdeck"
 location: "us-east4"
 schemas:
   - source: "./schema"
@@ -7,7 +7,7 @@ schemas:
       postgresql:
         database: "fdcdb"
         cloudSql:
-          instanceId: "quizhub-fdc"
+          instanceId: "quizdeck-fdc"
           # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
           # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
 connectorDirs: ["./example"]
