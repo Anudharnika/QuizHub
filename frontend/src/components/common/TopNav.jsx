@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User, Settings, Sparkles, Radio, CheckCircle2, XCircle, Info, Trophy, AlertTriangle } from 'lucide-react';
+import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User, Settings, Sparkles, Radio, CheckCircle2, XCircle, Info, Trophy, AlertTriangle, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { notificationAPI } from '../../services/api';
 
-export default function TopNav() {
+export default function TopNav({ onMenuClick }) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -62,23 +62,40 @@ export default function TopNav() {
   const notifColorMap = { success: 'text-emerald-500', error: 'text-red-500', info: 'text-blue-500', badge: 'text-amber-500', warning: 'text-amber-500' };
 
   return (
-    <header className="h-18 bg-[#FFFDF9] border-b-2 border-black flex items-center px-4 sm:px-8 gap-4 sticky top-0 z-30 shadow-[0px_2px_0px_#000]">
+    <header className="h-16 sm:h-18 bg-[#FFFDF9] border-b-2 border-black flex items-center px-2.5 sm:px-8 gap-2 sm:gap-4 sticky top-0 z-30 shadow-[0px_2px_0px_#000] w-full max-w-full min-w-0 flex-shrink-0">
       
+      {/* Mobile Menu Toggle + Logo */}
+      <div className="lg:hidden flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={onMenuClick}
+          className="p-1.5 sm:p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000] active:translate-y-[1px]"
+          aria-label="Open Navigation Menu"
+        >
+          <Menu className="w-5 h-5 text-black" />
+        </button>
+        <Link to="/dashboard" className="flex items-center gap-1.5">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-sm sm:text-base shadow-[2px_2px_0px_#000]">
+            Q
+          </div>
+          <span className="font-black text-lg sm:text-xl font-display hidden min-[380px]:inline">QuizDeck</span>
+        </Link>
+      </div>
+
       {/* Search Input */}
-      <form onSubmit={handleSearch} className="flex-1 max-w-md">
+      <form onSubmit={handleSearch} className="flex-1 min-w-0 max-w-[130px] min-[380px]:max-w-[160px] sm:max-w-md">
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Search quizzes, topics..."
+            placeholder="Search quizzes..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-white border-2 border-black font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EC4899] shadow-[2px_2px_0px_#000]"
+            className="w-full pl-8 sm:pl-10 pr-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-full bg-white border-2 border-black font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EC4899] shadow-[2px_2px_0px_#000]"
           />
         </div>
       </form>
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
         
         {/* Live Arena Quick Button */}
         <Link to="/live" className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-black bg-amber-300 font-extrabold text-xs shadow-[2px_2px_0px_#000] hover:translate-y-[-1px]">
@@ -89,11 +106,11 @@ export default function TopNav() {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000] text-black hover:bg-slate-50 transition-all"
+            className="relative p-1.5 sm:p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000] text-black hover:bg-slate-50 transition-all"
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#EC4899] text-white text-[10px] font-black rounded-full flex items-center justify-center border border-black shadow-[1px_1px_0px_#000]">
+              <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[#EC4899] text-white text-[9px] sm:text-[10px] font-black rounded-full flex items-center justify-center border border-black shadow-[1px_1px_0px_#000]">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -106,7 +123,7 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="absolute -right-2 sm:right-0 top-12 w-[calc(100vw-2rem)] max-w-xs sm:w-80 neo-box p-0 overflow-hidden z-50 bg-white shadow-2xl"
+                className="absolute right-0 top-12 w-[calc(100vw-2rem)] max-w-xs sm:w-80 neo-box p-0 overflow-hidden z-50 bg-white shadow-2xl"
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black bg-amber-100">
                   <h3 className="font-extrabold text-slate-900 text-sm font-display">Notifications</h3>
@@ -144,12 +161,12 @@ export default function TopNav() {
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-slate-50 transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-slate-50 transition-all"
           >
             <img
               src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`}
               alt={user?.name}
-              className="w-7 h-7 rounded-full border border-black object-cover"
+              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-black object-cover"
             />
             <span className="hidden sm:block text-xs font-black text-slate-900 max-w-[100px] truncate font-display">
               {user?.name?.split(' ')[0]}
@@ -193,3 +210,4 @@ export default function TopNav() {
     </header>
   );
 }
+

@@ -92,7 +92,8 @@ export default function ExplorePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-7xl mx-auto space-y-6 pb-12 w-full min-w-0">
         
         {/* Header */}
         <div>
@@ -106,7 +107,7 @@ export default function ExplorePage() {
         </div>
 
         {/* Search + filters */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full max-w-full">
           <form onSubmit={handleSearch} className="flex-1 min-w-0 max-w-md relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
@@ -127,7 +128,7 @@ export default function ExplorePage() {
         </div>
 
         {/* Category Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin w-full max-w-full">
           {CATEGORIES.map(c => (
             <button
               key={c}
@@ -145,7 +146,7 @@ export default function ExplorePage() {
 
         {/* All quizzes Grid */}
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full max-w-full min-w-0">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="neo-box p-5 bg-white animate-pulse">
                 <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
@@ -155,7 +156,7 @@ export default function ExplorePage() {
             ))}
           </div>
         ) : quizzes.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full max-w-full min-w-0">
             {quizzes.map((quiz, i) => <QuizCard key={quiz.id || quiz._id || i} quiz={quiz} delay={i * 0.05} />)}
           </div>
         ) : (
@@ -166,6 +167,7 @@ export default function ExplorePage() {
           </div>
         )}
 
+      </div>
       </div>
     </DashboardLayout>
   );

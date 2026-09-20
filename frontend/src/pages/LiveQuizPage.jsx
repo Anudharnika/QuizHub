@@ -348,7 +348,8 @@ export default function LiveQuizPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6 pb-16">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-4xl mx-auto space-y-6 pb-16 w-full min-w-0">
         
         {/* ================= SCREEN 1: SETUP ================= */}
         {gameState === 'select' && (
@@ -580,6 +581,7 @@ export default function LiveQuizPage() {
           </div>
         )}
 
+      </div>
       </div>
     </DashboardLayout>
   );

@@ -37,7 +37,8 @@ export default function LeaderboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-8 pb-12">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-5xl mx-auto space-y-8 pb-12 w-full min-w-0">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -71,7 +72,7 @@ export default function LeaderboardPage() {
 
         {/* Top 3 Podium */}
         {!loading && top3.length >= 1 && search === '' && (
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-6 items-end pt-4 sm:pt-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-6 items-end pt-4 sm:pt-8 max-w-2xl mx-auto w-full max-w-full min-w-0">
             
             {/* Rank 2 - Silver */}
             {top3[1] && (
@@ -199,6 +200,7 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
+      </div>
       </div>
     </DashboardLayout>
   );

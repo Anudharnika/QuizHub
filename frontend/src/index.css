@@ -21,13 +21,20 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
   }
 
-  body {
+  body, #root {
     background-color: #FFFDF9;
     color: #0F172A;
     font-family: 'Plus Jakarta Sans', sans-serif;
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   h1, h2, h3, h4, h5, h6 {

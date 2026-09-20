@@ -71,119 +71,124 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] text-slate-900 font-sans selection:bg-[#EC4899] selection:text-white relative overflow-hidden bg-grid-pattern">
+    <div className="min-h-screen bg-[#FFFDF9] text-slate-900 font-sans selection:bg-[#EC4899] selection:text-white relative overflow-x-hidden w-full max-w-full bg-grid-pattern">
       
       {/* Top Ticker Ribbon Banner */}
-      <div className="w-full bg-black text-white py-1.5 overflow-hidden border-b-2 border-black">
+      <div className="w-full bg-black text-white py-1.5 overflow-hidden border-b-2 border-black" style={{ maxWidth: '100vw' }}>
         <motion.div 
           animate={{ x: [0, -1000] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="whitespace-nowrap text-xs font-bold uppercase tracking-widest flex gap-8 items-center"
+          className="whitespace-nowrap min-w-max text-xs font-bold uppercase tracking-widest flex gap-8 items-center"
         >
           <span>QuizDeck • The Ultimate AI Quiz Platform for College</span>
           <span>✦ Instant Document to Quiz Conversion</span>
-          <span>Real-time Leaderboards & Live Multiplayer</span>
+          <span>Real-time Leaderboards &amp; Live Multiplayer</span>
           <span>QuizDeck • The Ultimate AI Quiz Platform for College</span>
           <span>✦ Instant Document to Quiz Conversion</span>
         </motion.div>
       </div>
 
       {/* Header Navbar */}
-      <header className="max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between relative z-20">
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] group-hover:rotate-6 transition-transform">
-            Q
+      <div className="w-full max-w-full px-4 sm:px-8 relative z-20">
+        <header className="max-w-7xl mx-auto py-5 flex items-center justify-between min-w-0">
+          {/* Brand Logo */}
+          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-xl shadow-[3px_3px_0px_#000] group-hover:rotate-6 transition-transform">
+              Q
+            </div>
+            <span className="font-extrabold text-2xl tracking-tight font-display">
+              Quiz<span className="text-[#EC4899]">Deck</span>
+            </span>
+          </Link>
+
+          {/* Center Nav Links */}
+          <nav className="hidden md:flex items-center gap-8 font-bold text-sm">
+            <a href="#quizzes" className="hover:text-[#EC4899] transition-colors">Kind of Quizzes</a>
+            <a href="#features" className="hover:text-[#EC4899] transition-colors">Features</a>
+            <a href="#faq" className="hover:text-[#EC4899] transition-colors">FAQ</a>
+            <Link to="/explore" className="hover:text-[#EC4899] transition-colors">Explore</Link>
+          </nav>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {user ? (
+              <Link to="/dashboard" className="neo-btn-pink text-sm">
+                Dashboard <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth" className="neo-btn-pink text-sm">
+                  Get started
+                </Link>
+                <Link to="/auth?mode=login" className="neo-btn-white text-sm hidden sm:inline-flex">
+                  Login <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+              </>
+            )}
           </div>
-          <span className="font-extrabold text-2xl tracking-tight font-display">
-            Quiz<span className="text-[#EC4899]">Deck</span>
-          </span>
-        </Link>
-
-        {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 font-bold text-sm">
-          <a href="#quizzes" className="hover:text-[#EC4899] transition-colors">Kind of Quizzes</a>
-          <a href="#features" className="hover:text-[#EC4899] transition-colors">Features</a>
-          <a href="#faq" className="hover:text-[#EC4899] transition-colors">FAQ</a>
-          <Link to="/explore" className="hover:text-[#EC4899] transition-colors">Explore</Link>
-        </nav>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
-          {user ? (
-            <Link to="/dashboard" className="neo-btn-pink">
-              Dashboard <ArrowRight className="w-4 h-4" />
-            </Link>
-          ) : (
-            <>
-              <Link to="/auth" className="neo-btn-pink text-sm">
-                Get started
-              </Link>
-              <Link to="/auth?mode=login" className="neo-btn-white text-sm hidden sm:inline-flex">
-                Login <ChevronDown className="w-3.5 h-3.5" />
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* HERO SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-16 lg:pt-16 lg:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative">
-        
-        {/* Floating background sparkles */}
-        <SparkleStar className="absolute top-10 left-10 w-8 h-8 text-[#EC4899]" />
-        <SparkleStar className="absolute bottom-10 right-1/2 w-6 h-6 text-amber-400" />
+      <div className="w-full max-w-full px-4 sm:px-8 overflow-hidden">
+        <section className="max-w-7xl mx-auto pt-8 pb-16 lg:pt-16 lg:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center relative">
+          
+          {/* Floating background sparkles */}
+          <SparkleStar className="absolute top-10 left-2 w-6 h-6 sm:w-8 sm:h-8 text-[#EC4899] pointer-events-none" />
+          <SparkleStar className="absolute bottom-10 right-1/3 w-5 h-5 sm:w-6 sm:h-6 text-amber-400 pointer-events-none" />
 
-        {/* Left Hero Content */}
-        <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-          className="lg:col-span-7 space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-black bg-amber-100 text-xs font-black shadow-[2px_2px_0px_#000]">
-            <Sparkles className="w-3.5 h-3.5 text-[#EC4899]" /> Next-Gen AI Quiz Creator
+          {/* Left Hero Content */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+            className="lg:col-span-7 space-y-5 sm:space-y-6 min-w-0"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-black bg-amber-100 text-xs font-black shadow-[2px_2px_0px_#000]">
+              <Sparkles className="w-3.5 h-3.5 text-[#EC4899]" /> Next-Gen AI Quiz Creator
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black font-display tracking-tight leading-[1.08] break-words">
+              Best <span className="neo-tag-pink font-black px-2 sm:px-3 py-1 my-1 inline-block">AI Platform</span> To Convert Documents To Quiz Instantly
+            </h1>
+
+            <p className="text-slate-600 font-medium text-base sm:text-xl max-w-2xl leading-relaxed">
+              With QuizDeck all teachers and students can generate big and small Quizzes in seconds and host them live across college domains!
+            </p>
+
+            {/* Action CTAs */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+              <Link to={user ? "/create-quiz" : "/auth"} className="neo-btn-pink text-sm sm:text-base px-5 sm:px-8 py-2.5 sm:py-3.5 w-full sm:w-auto">
+                Get Started <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Link>
+              <Link to="/explore" className="neo-btn-white text-sm sm:text-base px-5 sm:px-7 py-2.5 sm:py-3.5 w-full sm:w-auto">
+                Explore Quizzes <ChevronDown className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="pt-2 flex items-center gap-2 text-xs font-bold text-slate-500">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <a href="#faq" className="hover:underline text-slate-700">Have any question?</a>
+            </div>
+          </motion.div>
+
+          {/* Right Hero Graphic with Doodle */}
+          <div className="lg:col-span-5 flex justify-center relative hidden sm:flex">
+            {/* Rotating badge floating on side */}
+            <RotatingBadgeDoodle 
+              text="Learn more about service • " 
+              icon={Flame} 
+              className="absolute -top-6 -left-6 z-20 scale-75 sm:scale-90" 
+            />
+
+            <AnimatedHeroCharacter />
           </div>
-
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight leading-[1.05]">
-            Best <span className="neo-tag-pink font-black px-3 py-1 my-1 inline-block">AI Platform</span> To Convert Documents To Quiz Instantly
-          </h1>
-
-          <p className="text-slate-600 font-medium text-lg sm:text-xl max-w-2xl leading-relaxed">
-            With QuizDeck all teachers and students can generate big and small Quizzes in seconds and host them live across college domains!
-          </p>
-
-          {/* Action CTAs */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
-            <Link to={user ? "/create-quiz" : "/auth"} className="neo-btn-pink text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto">
-              Get Started <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link to="/explore" className="neo-btn-white text-base sm:text-lg px-6 sm:px-7 py-3 sm:py-3.5 w-full sm:w-auto">
-              Explore Quizzes <ChevronDown className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="pt-2 flex items-center gap-2 text-xs font-bold text-slate-500">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <a href="#faq" className="hover:underline text-slate-700">Have any question?</a>
-          </div>
-        </motion.div>
-
-        {/* Right Hero Graphic with Doodle */}
-        <div className="lg:col-span-5 flex justify-center relative">
-          {/* Rotating badge floating on side */}
-          <RotatingBadgeDoodle 
-            text="Learn more about service • " 
-            icon={Flame} 
-            className="absolute -top-6 left-0 sm:-left-6 z-20 scale-75 sm:scale-100" 
-          />
-
-          <AnimatedHeroCharacter />
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* KIND OF QUIZZES GRID SECTION */}
-      <section id="quizzes" className="max-w-7xl mx-auto px-4 sm:px-8 py-16 border-t-2 border-black/10">
+      <div className="w-full max-w-full px-4 sm:px-8 overflow-hidden border-t-2 border-black/10">
+      <section id="quizzes" className="max-w-7xl mx-auto py-16">
         <div className="text-center space-y-3 mb-12">
           <h2 className="text-3xl sm:text-5xl font-extrabold font-display">Kind of Quizzes</h2>
           <p className="text-slate-600 font-medium text-lg">Create or take any style of interactive test in seconds</p>
@@ -261,9 +266,11 @@ export default function LandingPage() {
 
         </div>
       </section>
+      </div>
 
       {/* FEATURE HIGHLIGHT BANNER SECTION */}
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+      <div className="w-full max-w-full px-4 sm:px-8 overflow-hidden">
+      <section id="features" className="max-w-7xl mx-auto py-16">
         <div className="bg-white border-[3px] border-black rounded-[2.5rem] p-8 sm:p-12 shadow-[8px_8px_0px_#000] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           <div className="lg:col-span-5 flex justify-center">
@@ -286,15 +293,19 @@ export default function LandingPage() {
 
         </div>
       </section>
+      </div>
 
       {/* FREQUENTLY ASKED QUESTIONS SECTION */}
-      <section id="faq" className="max-w-5xl mx-auto px-4 sm:px-8 py-16 relative">
-        {/* Floating Rotating Doodle */}
-        <RotatingBadgeDoodle 
-          text="Learn more about service • " 
-          icon={HelpCircle} 
-          className="absolute -top-6 right-2 sm:-right-2 z-20 scale-75 sm:scale-100" 
-        />
+      <div className="w-full max-w-full px-4 sm:px-8 overflow-hidden">
+      <section id="faq" className="max-w-5xl mx-auto py-16 relative">
+        {/* Floating Rotating Doodle - hidden on small screens */}
+        <div className="hidden sm:block">
+          <RotatingBadgeDoodle 
+            text="Learn more about service • " 
+            icon={HelpCircle} 
+            className="absolute -top-6 right-0 z-20 scale-75 sm:scale-90" 
+          />
+        </div>
 
         <div className="neo-box p-6 sm:p-10 relative">
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-center mb-8">
@@ -353,9 +364,11 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* LETS MAKE FIRST QUIZ CTA BANNER */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+      <div className="w-full max-w-full px-4 sm:px-8 overflow-hidden">
+      <section className="max-w-7xl mx-auto py-16">
         <div className="relative bg-[#EC4899] border-[3px] border-black rounded-[2.5rem] p-6 sm:p-14 shadow-[8px_8px_0px_#000] text-center text-white overflow-hidden">
           
           {/* Corner Sparkle Doodles */}
@@ -391,9 +404,10 @@ export default function LandingPage() {
 
         </div>
       </section>
+      </div>
 
       {/* FOOTER */}
-      <footer className="w-full bg-[#F8FAFC] border-t-2 border-black py-12 px-4 sm:px-8">
+      <footer className="w-full max-w-full bg-[#F8FAFC] border-t-2 border-black py-12 px-4 sm:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           
           {/* Logo & Tagline */}

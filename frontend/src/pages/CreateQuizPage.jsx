@@ -132,7 +132,8 @@ export default function CreateQuizPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6 pb-16">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-4xl mx-auto space-y-6 pb-16 w-full min-w-0">
         
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -145,7 +146,7 @@ export default function CreateQuizPage() {
         </div>
 
         {/* Step indicator */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin w-full max-w-full">
           {STEPS.map((s, i) => (
             <button
               key={i}
@@ -165,7 +166,7 @@ export default function CreateQuizPage() {
         </div>
 
         {/* Step Content Container */}
-        <div className="neo-box p-4 sm:p-10 bg-white relative">
+        <div className="neo-box p-4 sm:p-10 bg-white relative w-full min-w-0 max-w-full">
           
           {/* STEP 0: INFO */}
           {step === 0 && (
@@ -529,6 +530,7 @@ export default function CreateQuizPage() {
           )}
         </div>
 
+      </div>
       </div>
     </DashboardLayout>
   );

@@ -90,7 +90,8 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-7xl mx-auto space-y-6 pb-12 w-full min-w-0">
         
         {/* Header with Switcher */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -123,10 +124,10 @@ export default function AnalyticsPage() {
             <div className="w-12 h-12 border-4 border-[#EC4899] border-t-black rounded-full animate-spin shadow-[3px_3px_0px_#000]" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 w-full max-w-full min-w-0">
             
             {/* Overview Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-full min-w-0">
               <div className="neo-box p-3.5 sm:p-5 bg-white">
                 <span className="text-[10px] sm:text-xs font-black uppercase text-slate-500 font-display">Quizzes Taken</span>
                 <p className="text-2xl sm:text-3xl font-black text-slate-900 font-display mt-1">{data?.totalQuizzesTaken || 0}</p>
@@ -154,28 +155,30 @@ export default function AnalyticsPage() {
 
             {/* Weekly Activity Chart — only when real data exists */}
             {activityData.length > 0 ? (
-              <div className="neo-box p-6 bg-white">
+              <div className="neo-box p-6 bg-white min-w-0 w-full max-w-full overflow-hidden">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="font-extrabold text-lg text-slate-900 font-display">Weekly Activity & Scores</h3>
                     <p className="text-xs font-bold text-slate-500">Your test count and score progression</p>
                   </div>
                 </div>
-                <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={activityData}>
-                    <defs>
-                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="day" tick={{ fontSize: 11, fontWeight: 700, fill: '#000' }} axisLine={false} tickLine={false} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fontWeight: 700, fill: '#000' }} axisLine={false} tickLine={false} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="score" name="Avg Score %" stroke="#EC4899" strokeWidth={3} fill="url(#colorScore)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <div className="w-full h-[240px] min-w-0 overflow-hidden">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={activityData}>
+                      <defs>
+                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#EC4899" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="day" tick={{ fontSize: 11, fontWeight: 700, fill: '#000' }} axisLine={false} tickLine={false} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 11, fontWeight: 700, fill: '#000' }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="score" name="Avg Score %" stroke="#EC4899" strokeWidth={3} fill="url(#colorScore)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             ) : (
               <div className="neo-box p-5 bg-white flex items-center gap-4 text-slate-500">
@@ -189,6 +192,7 @@ export default function AnalyticsPage() {
 
           </div>
         )}
+      </div>
       </div>
     </DashboardLayout>
   );

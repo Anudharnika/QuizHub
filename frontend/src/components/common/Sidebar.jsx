@@ -31,11 +31,14 @@ const bottomItems = [
   { icon: Settings, label: 'Settings', to: '/settings' },
 ];
 
-export default function Sidebar({ collapsed, setCollapsed }) {
+export default function Sidebar({ collapsed, setCollapsed, mobileOpen: propMobileOpen, setMobileOpen: propSetMobileOpen }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false);
+
+  const mobileOpen = propMobileOpen !== undefined ? propMobileOpen : internalMobileOpen;
+  const setMobileOpen = propSetMobileOpen !== undefined ? propSetMobileOpen : setInternalMobileOpen;
 
   const handleLogout = () => {
     logout();
@@ -63,26 +66,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <>
-      {/* Mobile Top Header Bar */}
-      <div className="lg:hidden sticky top-0 z-30 bg-[#FFFDF9] border-b-2 border-black px-4 py-3 flex items-center justify-between shadow-[0px_2px_0px_#000]">
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000]"
-        >
-          <Menu className="w-5 h-5 text-black" />
-        </button>
 
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#EC4899] border-2 border-black flex items-center justify-center text-white font-black text-base shadow-[2px_2px_0px_#000]">
-            Q
-          </div>
-          <span className="font-black text-xl font-display">QuizDeck</span>
-        </Link>
-
-        <Link to="/profile" className="w-8 h-8 rounded-full border-2 border-black overflow-hidden shadow-[1px_1px_0px_#000]">
-          <img src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name}`} alt="user" className="w-full h-full object-cover" />
-        </Link>
-      </div>
 
       {/* Mobile Drawer Overlay */}
       <AnimatePresence>
@@ -173,7 +157,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       </motion.aside>
 
       {/* Mobile Bottom Quick Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-black px-2 py-1.5 flex items-center justify-around shadow-[0px_-4px_0px_#000]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 w-full max-w-full overflow-hidden z-40 bg-white border-t-2 border-black px-2 py-1.5 flex items-center justify-around shadow-[0px_-4px_0px_#000]">
         {mobileBottomNav.map((item) => {
           const active = isActive(item.to);
           return (

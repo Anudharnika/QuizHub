@@ -64,7 +64,8 @@ export default function MyQuizzesPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-6xl mx-auto space-y-6 pb-12 w-full min-w-0">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -97,7 +98,7 @@ export default function MyQuizzesPage() {
 
         {/* Quiz Grid */}
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-full min-w-0">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="neo-box p-5 bg-white animate-pulse">
                 <div className="h-28 bg-slate-200 rounded-xl mb-3" />
@@ -118,7 +119,7 @@ export default function MyQuizzesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-full min-w-0">
             {filtered.map((q) => {
               const quizId = q.id || q._id;
               return (
@@ -251,6 +252,7 @@ export default function MyQuizzesPage() {
             </div>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </DashboardLayout>
   );

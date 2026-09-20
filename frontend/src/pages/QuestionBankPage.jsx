@@ -100,7 +100,8 @@ export default function QuestionBankPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="max-w-6xl mx-auto space-y-6 pb-12 w-full min-w-0">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -124,7 +125,7 @@ export default function QuestionBankPage() {
 
         {/* Filters and Search */}
         <div className="flex flex-wrap items-center gap-3">
-          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[240px] relative">
+          <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
@@ -147,7 +148,7 @@ export default function QuestionBankPage() {
         </div>
 
         {/* Category Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin w-full max-w-full">
           {CATEGORIES.map(c => (
             <button
               key={c}
@@ -465,6 +466,7 @@ export default function QuestionBankPage() {
             </div>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </DashboardLayout>
   );
